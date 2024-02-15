@@ -19,3 +19,8 @@ export const generateEmailVerificationCode = async (
 
 	return code;
 };
+
+// TODO
+export const sendVerificationCode = async (email: string, verificationCode: string) => {
+	return;
+};

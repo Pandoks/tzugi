@@ -6,6 +6,7 @@ import { fail, type Actions, redirect } from '@sveltejs/kit';
 import { generateId } from 'lucia';
 import { Argon2id } from 'oslo/password';
 import type { PageServerLoad, PageServerLoadEvent } from './$types';
+import { generateEmailVerificationCode, sendVerificationCode } from '$lib/server/email';
 
 export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
 	if (event.locals.user) {
@@ -36,14 +37,22 @@ export const actions: Actions = {
 		const hashedPassword = await new Argon2id().hash(password);
 
 		try {
-			await db
-				.insert(users)
-				.values({ id: userId, username: username, email: email, hashed_password: hashedPassword });
+			await db.insert(users).values({
+				id: userId,
+				username: username,
+				email: email,
+				emailVerified: false,
+				hashed_password: hashedPassword
+			});
 		} catch {
 			return fail(400, {
 				message: 'Username or email already exists'
 			});
 		}
+
+		const verificationCode = await generateEmailVerificationCode(userId, email);
+		// TODO: Make sure you implement rate limiting based on user ID and IP address
+		await sendVerificationCode(email, verificationCode);
 
 		const session = await lucia.createSession(userId, {});
 		const sessionCookie = lucia.createSessionCookie(session.id);
