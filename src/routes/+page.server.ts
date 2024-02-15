@@ -4,7 +4,7 @@ import type { PageServerLoad, PageServerLoadEvent } from './$types';
 
 export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
 	if (!event.locals.user) {
-		return redirect(302, '/login');
+		return redirect(302, '/auth/login');
 	}
 
 	return { username: event.locals.user.username };
@@ -23,6 +23,6 @@ export const actions: Actions = {
 			...sessionCookie.attributes
 		});
 
-		return redirect(302, '/login');
+		return redirect(302, '/auth/login');
 	}
 };
