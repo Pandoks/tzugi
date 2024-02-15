@@ -1,9 +1,9 @@
 import { db } from '$lib/db';
 import { users } from '$lib/db/schema';
 import { lucia } from '$lib/server/auth';
-import { passwordSchema, usernameSchema } from '$lib/server/validation';
+import { emailSchema, passwordSchema, usernameSchema } from '$lib/server/validation';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { Argon2id } from 'oslo/password';
 
 export const actions: Actions = {
@@ -12,6 +12,7 @@ export const actions: Actions = {
 
 		if (
 			!usernameSchema.safeParse(formData.get('username')).success ||
+			!emailSchema.safeParse(formData.get('email')).success ||
 			!passwordSchema.safeParse(formData.get('password')).success
 		) {
 			return fail(400, {
@@ -20,14 +21,19 @@ export const actions: Actions = {
 		}
 
 		const username = formData.get('username') as string;
+		const email = formData.get('email') as string;
 		const password = formData.get('password') as string;
 
 		const existingUser = (
-			await db.select().from(users).where(eq(users.username, username)).limit(1)
+			await db
+				.select()
+				.from(users)
+				.where(and(eq(users.username, username), eq(users.email, email)))
+				.limit(1)
 		)[0];
 		if (!existingUser) {
 			return fail(400, {
-				message: 'Incorrect username or password'
+				message: 'Incorrect username or email or password'
 			});
 		}
 

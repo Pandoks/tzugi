@@ -1,7 +1,7 @@
 import { db } from '$lib/db';
 import { users } from '$lib/db/schema';
 import { lucia } from '$lib/server/auth';
-import { passwordSchema, usernameSchema } from '$lib/server/validation';
+import { emailSchema, passwordSchema, usernameSchema } from '$lib/server/validation';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
 import { generateId } from 'lucia';
 import { Argon2id } from 'oslo/password';
@@ -20,28 +20,28 @@ export const actions: Actions = {
 
 		if (
 			!usernameSchema.safeParse(formData.get('username')).success ||
+			!emailSchema.safeParse(formData.get('email')).success ||
 			!passwordSchema.safeParse(formData.get('password')).success
 		) {
 			return fail(400, {
-				message: 'Invalid username or password'
+				message: 'Invalid username or email or password'
 			});
 		}
 
 		const username = formData.get('username') as string;
+		const email = formData.get('email') as string;
 		const password = formData.get('password') as string;
 
 		const userId = generateId(15);
 		const hashedPassword = await new Argon2id().hash(password);
 
-		const dbInsert = await db
-			.insert(users)
-			.values({ id: userId, username: username, hashed_password: hashedPassword })
-			.onConflictDoNothing()
-			.returning();
-
-		if (dbInsert.length === 0) {
+		try {
+			await db
+				.insert(users)
+				.values({ id: userId, username: username, email: email, hashed_password: hashedPassword });
+		} catch {
 			return fail(400, {
-				message: 'Username already exists'
+				message: 'Username or email already exists'
 			});
 		}
 
