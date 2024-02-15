@@ -4,7 +4,6 @@ import { lucia } from '$lib/server/auth';
 import { passwordSchema, usernameSchema } from '$lib/server/validation';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
-import { alphabet, generateRandomString } from 'oslo/crypto';
 import { Argon2id } from 'oslo/password';
 
 export const actions: Actions = {
@@ -27,7 +26,6 @@ export const actions: Actions = {
 			await db.select().from(users).where(eq(users.username, username)).limit(1)
 		)[0];
 		if (!existingUser) {
-			await new Argon2id().hash(generateRandomString(8, alphabet('a-z', 'A-Z', '0-9')));
 			return fail(400, {
 				message: 'Incorrect username or password'
 			});

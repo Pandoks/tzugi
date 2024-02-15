@@ -9,6 +9,7 @@ if (!DB_CONNECTION_STRING) {
 export default defineConfig({
 	schema: './src/lib/db/schema.ts',
 	driver: 'pg',
+	out: './migrations',
 	dbCredentials: {
 		connectionString: DB_CONNECTION_STRING
 	},
