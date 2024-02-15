@@ -5,9 +5,9 @@ import { passwordSchema, usernameSchema } from '$lib/server/validation';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
 import { generateId } from 'lucia';
 import { Argon2id } from 'oslo/password';
-import type { PageServerLoad } from './$types';
+import type { PageServerLoad, PageServerLoadEvent } from './$types';
 
-export const load: PageServerLoad = async (event) => {
+export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
 	if (event.locals.user) {
 		return redirect(302, '/');
 	}
