@@ -9,7 +9,7 @@ export const generateEmailVerificationCode = async (
 	email: string
 ): Promise<string> => {
 	await db.delete(emailVerifications).where(eq(emailVerifications.userId, userId));
-	const code = generateRandomString(8, alphabet('0-9'));
+	const code = generateRandomString(6, alphabet('0-9', 'A-Z'));
 	await db.insert(emailVerifications).values({
 		userId: userId,
 		email: email,
