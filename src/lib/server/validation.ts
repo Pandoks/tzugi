@@ -9,3 +9,5 @@ export const usernameSchema = z
 export const passwordSchema = z.string().min(6).max(255);
 
 export const emailSchema = z.string().email();
+
+export const emailCodeSchema = z.string().max(6);

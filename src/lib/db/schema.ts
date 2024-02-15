@@ -21,14 +21,14 @@ export const sessions = pgTable('sessions', {
 
 export const emailVerifications = pgTable('email_verifications', {
 	id: serial('id').primaryKey(),
-	code: text('code'),
+	code: text('code').notNull(),
 	userId: text('user_id')
 		.unique()
 		.notNull()
 		.references(() => users.id),
-	email: text('email'),
+	email: text('email').notNull(),
 	expiresAt: timestamp('expires_at', {
 		withTimezone: true,
 		mode: 'date'
-	})
+	}).notNull()
 });
