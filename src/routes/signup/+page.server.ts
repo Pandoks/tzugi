@@ -5,6 +5,14 @@ import { passwordSchema, usernameSchema } from '$lib/server/validation';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
 import { generateId } from 'lucia';
 import { Argon2id } from 'oslo/password';
+import type { PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async (event) => {
+	if (event.locals.user) {
+		return redirect(302, '/');
+	}
+	return {};
+};
 
 export const actions: Actions = {
 	default: async (event) => {
@@ -44,6 +52,6 @@ export const actions: Actions = {
 			...sessionCookie.attributes
 		});
 
-		redirect(302, '/');
+		return redirect(302, '/');
 	}
 };
