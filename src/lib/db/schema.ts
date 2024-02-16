@@ -32,3 +32,14 @@ export const emailVerifications = pgTable('email_verifications', {
 		mode: 'date'
 	}).notNull()
 });
+
+export const passwordResets = pgTable('password_resets', {
+	id: text('id').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => users.id),
+	expiresAt: timestamp('expires_at', {
+		withTimezone: true,
+		mode: 'date'
+	}).notNull()
+});
