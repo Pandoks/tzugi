@@ -42,7 +42,7 @@ export const actions: Actions = {
 				username: username,
 				email: email,
 				emailVerified: false,
-				hashed_password: hashedPassword
+				hashedPassword: hashedPassword
 			});
 		} catch {
 			return fail(400, {

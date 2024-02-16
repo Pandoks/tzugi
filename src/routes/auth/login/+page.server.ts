@@ -37,7 +37,7 @@ export const actions: Actions = {
 
 		const existingUser = dbUserQuery[0];
 
-		const validPassword = await new Argon2id().verify(existingUser.hashed_password, password);
+		const validPassword = await new Argon2id().verify(existingUser.hashedPassword, password);
 		if (!validPassword) {
 			return fail(400, {
 				message: 'Incorrect username or password'

@@ -60,6 +60,6 @@ export const verifyVerificationCode = async (user: User, code: string): Promise<
 };
 
 // TODO
-export const sendPasswordResetToken = async (email: string, verificationLink: string) {
-  return;
-}
+export const sendPasswordResetToken = async (email: string, verificationLink: string) => {
+	return;
+};
