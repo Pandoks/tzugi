@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import type { User } from 'lucia';
 import { TimeSpan, createDate, isWithinExpirationDate } from 'oslo';
 import { alphabet, generateRandomString } from 'oslo/crypto';
+import { emailCodeSchema } from './validation';
 
 export const generateEmailVerificationCode = async (
 	userId: string,
@@ -38,7 +39,11 @@ export const verifyVerificationCode = async (user: User, code: string): Promise<
 	}
 
 	const verificationCode = dbVerificationCodeQuery[0];
-	if (!verificationCode.code || verificationCode.code !== code) {
+	if (
+		!verificationCode.code ||
+		verificationCode.code !== code ||
+		!emailCodeSchema.safeParse(verificationCode.code).success
+	) {
 		return false;
 	}
 
