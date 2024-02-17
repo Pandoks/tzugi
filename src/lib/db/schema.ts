@@ -47,7 +47,7 @@ export const passwordResets = pgTable('password_resets', {
 export const loginTimeouts = pgTable(
 	'login_timeouts',
 	{
-		userId: text('user_id')
+		userId: text('username')
 			.notNull()
 			.references(() => users.id),
 		ip: text('ip').notNull(),
