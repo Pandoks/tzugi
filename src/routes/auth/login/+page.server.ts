@@ -1,5 +1,5 @@
 import { db } from '$lib/db';
-import { users } from '$lib/db/schema';
+import { loginTimeouts, users } from '$lib/db/schema';
 import { lucia } from '$lib/server/auth';
 import { emailSchema, passwordSchema, usernameSchema } from '$lib/server/validation';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
@@ -10,6 +10,45 @@ export const actions: Actions = {
 	default: async (event) => {
 		const formData = await event.request.formData();
 
+		// login throttling (prevent brute force)
+		const storedTimeout = (
+			await db
+				.select()
+				.from(loginTimeouts)
+				.where(
+					and(
+						eq(loginTimeouts.username, formData.get('username') as string),
+						eq(loginTimeouts.ip, event.getClientAddress())
+					)
+				)
+				.limit(1)
+		)[0];
+		const timeoutUntil = storedTimeout?.timeoutUntil ?? 0;
+		if (Date.now() < timeoutUntil) {
+			return fail(429);
+		}
+
+		const timeoutSeconds = storedTimeout ? storedTimeout.timeoutSeconds * 2 : 1;
+		try {
+			await db
+				.insert(loginTimeouts)
+				.values({
+					username: formData.get('username') as string,
+					ip: event.getClientAddress(),
+					timeoutUntil: Date.now() + timeoutSeconds * 1000,
+					timeoutSeconds: timeoutSeconds
+				})
+				.onConflictDoUpdate({
+					target: [loginTimeouts.username, loginTimeouts.ip],
+					set: { timeoutUntil: Date.now() + timeoutSeconds * 1000, timeoutSeconds: timeoutSeconds }
+				});
+		} catch {
+			return fail(400, {
+				message: 'Database insertion error'
+			});
+		}
+
+		// handle login
 		if (
 			!usernameSchema.safeParse(formData.get('username')).success ||
 			!emailSchema.safeParse(formData.get('email')).success ||
