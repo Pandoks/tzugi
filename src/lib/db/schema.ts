@@ -70,8 +70,16 @@ export const loginTimeouts = pgTable(
 	}
 );
 
-export const deviceCookies = pgTable('device_cookies', {
-	id: text('id').notNull(),
-	username: text('username').notNull(),
-	attempts: integer('attempts').default(0)
-});
+export const deviceCookies = pgTable(
+	'device_cookies',
+	{
+		id: text('id').notNull(),
+		username: text('username').notNull(),
+		attempts: integer('attempts').default(0)
+	},
+	(table) => {
+		return {
+			pk: primaryKey({ columns: [table.id, table.username] })
+		};
+	}
+);

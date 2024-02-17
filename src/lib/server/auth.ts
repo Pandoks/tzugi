@@ -1,6 +1,6 @@
 import { dev } from '$app/environment';
 import { db, luciaAdapter } from '$lib/db';
-import { passwordResets } from '$lib/db/schema';
+import { deviceCookies, passwordResets } from '$lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { Lucia, generateId } from 'lucia';
 import { TimeSpan, createDate } from 'oslo';
@@ -43,4 +43,10 @@ export const createPasswordResetToken = async (userId: string): Promise<string> 
 		.values({ id: tokenId, userId: userId, expiresAt: createDate(new TimeSpan(1, 'h')) });
 
 	return tokenId;
+};
+
+export const isValidDeviceCookie = (deviceCookieId: string | null, username: string) => {
+	if (!deviceCookieId) return false;
+
+	const deviceCookieAttributes = await db.select().from(deviceCookies).where();
 };
