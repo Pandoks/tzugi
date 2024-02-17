@@ -1,4 +1,4 @@
-import { boolean, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
+import { bigint, boolean, pgTable, primaryKey, serial, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
 	id: text('id').primaryKey(),
@@ -43,3 +43,20 @@ export const passwordResets = pgTable('password_resets', {
 		mode: 'date'
 	}).notNull()
 });
+
+export const loginTimeouts = pgTable(
+	'login_timeouts',
+	{
+		userId: text('user_id')
+			.notNull()
+			.references(() => users.id),
+		ip: text('ip').notNull(),
+		timeoutUntil: bigint('timeout_until', { mode: 'number' }).notNull(),
+		timeoutSeconds: bigint('timeout_seconds', { mode: 'number' }).notNull().default(0)
+	},
+	(table) => {
+		return {
+			pk: primaryKey({ columns: [table.userId, table.ip] })
+		};
+	}
+);
