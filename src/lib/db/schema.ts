@@ -1,4 +1,13 @@
-import { bigint, boolean, pgTable, primaryKey, serial, text, timestamp } from 'drizzle-orm/pg-core';
+import {
+	bigint,
+	boolean,
+	integer,
+	pgTable,
+	primaryKey,
+	serial,
+	text,
+	timestamp
+} from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
 	id: text('id').primaryKey(),
@@ -60,3 +69,9 @@ export const loginTimeouts = pgTable(
 		};
 	}
 );
+
+export const deviceCookies = pgTable('device_cookies', {
+	id: text('id').notNull(),
+	username: text('username').notNull(),
+	attempts: integer('attempts').default(0)
+});
