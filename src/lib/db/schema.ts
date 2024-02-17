@@ -47,7 +47,7 @@ export const passwordResets = pgTable('password_resets', {
 export const loginTimeouts = pgTable(
 	'login_timeouts',
 	{
-		userId: text('username')
+		username: text('username')
 			.notNull()
 			.references(() => users.id),
 		ip: text('ip').notNull(),
@@ -56,7 +56,7 @@ export const loginTimeouts = pgTable(
 	},
 	(table) => {
 		return {
-			pk: primaryKey({ columns: [table.userId, table.ip] })
+			pk: primaryKey({ columns: [table.username, table.ip] })
 		};
 	}
 );
