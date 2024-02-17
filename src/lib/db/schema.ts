@@ -75,7 +75,7 @@ export const deviceCookies = pgTable(
 	{
 		id: text('id').notNull(),
 		username: text('username').notNull(),
-		attempts: integer('attempts').default(0)
+		attempts: integer('attempts').notNull().default(0)
 	},
 	(table) => {
 		return {

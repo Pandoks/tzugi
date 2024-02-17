@@ -1,6 +1,7 @@
 import { dev } from '$app/environment';
 import { db, luciaAdapter } from '$lib/db';
 import { deviceCookies, passwordResets } from '$lib/db/schema';
+import { fail } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { Lucia, generateId } from 'lucia';
 import { TimeSpan, createDate } from 'oslo';
@@ -45,8 +46,43 @@ export const createPasswordResetToken = async (userId: string): Promise<string> 
 	return tokenId;
 };
 
-export const isValidDeviceCookie = (deviceCookieId: string | null, username: string) => {
+const ATTEMPTS_BEFORE_THROTTLING = 5;
+export const isValidDeviceCookie = async (deviceCookieId: string | null, username: string) => {
 	if (!deviceCookieId) return false;
 
-	const deviceCookieAttributes = await db.select().from(deviceCookies).where();
+	const deviceCookieAttributes = (
+		await db.select().from(deviceCookies).where(eq(deviceCookies.id, deviceCookieId)).limit(1)
+	)[0];
+	if (!deviceCookieAttributes) {
+		return false;
+	}
+
+	const currentAttempts = deviceCookieAttributes.attempts + 1;
+	if (
+		currentAttempts > ATTEMPTS_BEFORE_THROTTLING ||
+		deviceCookieAttributes.username !== username
+	) {
+		await db.delete(deviceCookies).where(eq(deviceCookies.id, deviceCookieId));
+		return false;
+	}
+
+	try {
+		await db
+			.insert(deviceCookies)
+			.values({
+				id: deviceCookieId,
+				username: username,
+				attempts: currentAttempts
+			})
+			.onConflictDoUpdate({
+				target: [deviceCookies.id, deviceCookies.username],
+				set: { attempts: currentAttempts }
+			});
+	} catch {
+		return fail(400, {
+			message: 'Database insert/update error'
+		});
+	}
+
+	return true;
 };
