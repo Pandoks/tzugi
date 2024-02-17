@@ -46,8 +46,11 @@ export const createPasswordResetToken = async (userId: string): Promise<string> 
 	return tokenId;
 };
 
-const ATTEMPTS_BEFORE_THROTTLING = 5;
-export const isValidDeviceCookie = async (deviceCookieId: string | null, username: string) => {
+export const isValidDeviceCookie = async (
+	deviceCookieId: string | null,
+	username: string,
+	attemptsBeforeThrottle: number = 5
+) => {
 	if (!deviceCookieId) return false;
 
 	const deviceCookieAttributes = (
@@ -58,10 +61,7 @@ export const isValidDeviceCookie = async (deviceCookieId: string | null, usernam
 	}
 
 	const currentAttempts = deviceCookieAttributes.attempts + 1;
-	if (
-		currentAttempts > ATTEMPTS_BEFORE_THROTTLING ||
-		deviceCookieAttributes.username !== username
-	) {
+	if (currentAttempts > attemptsBeforeThrottle || deviceCookieAttributes.username !== username) {
 		await db.delete(deviceCookies).where(eq(deviceCookies.id, deviceCookieId));
 		return false;
 	}
