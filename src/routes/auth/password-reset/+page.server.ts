@@ -18,7 +18,7 @@ export const actions: Actions = {
 		}
 
 		const email = formData.get('email') as string;
-		const user = (await db.select().from(users).where(eq(users.email, email)).limit(1))[0];
+		const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
 		if (!user || !user.emailVerified) {
 			return fail(400, {
 				message: 'Invalid email'
