@@ -23,37 +23,27 @@ export const actions: Actions = {
 			});
 		}
 
-		const token = (
-			await db
+		let token: { id: string; userId: string; expiresAt: Date } | undefined;
+		await db.transaction(async (tx) => {
+			[token] = await tx
 				.select()
 				.from(passwordResets)
 				.where(eq(passwordResets.id, verificationToken))
-				.limit(1)
-		)[0];
+				.limit(1);
+			if (token) {
+				await tx.delete(passwordResets).where(eq(passwordResets.id, verificationToken));
+			}
+		});
 		if (!token || !isWithinExpirationDate(token.expiresAt)) {
 			return fail(400);
 		}
 
-		try {
-			await db.delete(passwordResets).where(eq(passwordResets.id, verificationToken));
-		} catch {
-			return fail(400, {
-				message: 'Database deletion error'
-			});
-		}
-
 		await lucia.invalidateUserSessions(token.userId);
 		const hashedPassword = await new Argon2id().hash(newPassword);
-		try {
-			await db
-				.update(users)
-				.set({ hashedPassword: hashedPassword })
-				.where(eq(users.id, token.userId));
-		} catch {
-			return fail(400, {
-				message: 'Database update error'
-			});
-		}
+		await db
+			.update(users)
+			.set({ hashedPassword: hashedPassword })
+			.where(eq(users.id, token.userId));
 
 		const session = await lucia.createSession(token.userId, {});
 		const sessionCookie = lucia.createSessionCookie(session.id);
