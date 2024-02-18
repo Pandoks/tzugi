@@ -31,35 +31,33 @@ export const sendVerificationCode = async (email: string, verificationCode: stri
 };
 
 export const verifyVerificationCode = async (user: User, code: string): Promise<boolean> => {
-	const dbVerificationCodeQuery = await db
-		.select()
-		.from(emailVerifications)
-		.where(eq(emailVerifications.userId, user.id))
-		.limit(1);
+	return await db.transaction(async (tx) => {
+		const [verificationCode] = await tx
+			.select()
+			.from(emailVerifications)
+			.where(eq(emailVerifications.userId, user.id))
+			.limit(1);
 
-	if (dbVerificationCodeQuery.length === 0) {
-		return false;
-	}
+		if (
+			!verificationCode ||
+			!verificationCode.code ||
+			verificationCode.code !== code ||
+			!emailCodeSchema.safeParse(verificationCode.code).success
+		) {
+			return false;
+		}
 
-	const verificationCode = dbVerificationCodeQuery[0];
-	if (
-		!verificationCode.code ||
-		verificationCode.code !== code ||
-		!emailCodeSchema.safeParse(verificationCode.code).success
-	) {
-		return false;
-	}
+		await tx.delete(emailVerifications).where(eq(emailVerifications.id, verificationCode.id));
 
-	await db.delete(emailVerifications).where(eq(emailVerifications.id, verificationCode.id));
+		if (
+			!isWithinExpirationDate(verificationCode.expiresAt) ||
+			verificationCode.email !== user.email
+		) {
+			return false;
+		}
 
-	if (
-		!isWithinExpirationDate(verificationCode.expiresAt) ||
-		verificationCode.email !== user.email
-	) {
-		return false;
-	}
-
-	return true;
+		return true;
+	});
 };
 
 // TODO
