@@ -26,8 +26,8 @@ export const actions: Actions = {
 				maxAge: 0,
 				httpOnly: true
 			});
-			const storedTimeout = (
-				await db
+			await db.transaction(async (tx) => {
+				const [storedTimeout] = await tx
 					.select()
 					.from(loginTimeouts)
 					.where(
@@ -36,16 +36,14 @@ export const actions: Actions = {
 							eq(loginTimeouts.ip, event.getClientAddress())
 						)
 					)
-					.limit(1)
-			)[0];
-			const timeoutUntil = storedTimeout?.timeoutUntil ?? 0;
-			if (Date.now() < timeoutUntil) {
-				return fail(429);
-			}
+					.limit(1);
+				const timeoutUntil = storedTimeout?.timeoutUntil ?? 0;
+				if (Date.now() < timeoutUntil) {
+					return fail(429);
+				}
 
-			const timeoutSeconds = storedTimeout ? storedTimeout.timeoutSeconds * 2 : 1;
-			try {
-				await db
+				const timeoutSeconds = storedTimeout ? storedTimeout.timeoutSeconds * 2 : 1;
+				await tx
 					.insert(loginTimeouts)
 					.values({
 						username: formData.get('username') as string,
@@ -60,11 +58,7 @@ export const actions: Actions = {
 							timeoutSeconds: timeoutSeconds
 						}
 					});
-			} catch {
-				return fail(400, {
-					message: 'Database insertion error'
-				});
-			}
+			});
 		}
 
 		// handle login
@@ -82,18 +76,16 @@ export const actions: Actions = {
 		const email = formData.get('email') as string;
 		const password = formData.get('password') as string;
 
-		const dbUserQuery = await db
+		const [existingUser] = await db
 			.select()
 			.from(users)
 			.where(and(eq(users.username, username), eq(users.email, email)))
 			.limit(1);
-		if (dbUserQuery.length === 0) {
+		if (!existingUser) {
 			return fail(400, {
 				message: 'Incorrect username or email or password'
 			});
 		}
-
-		const existingUser = dbUserQuery[0];
 
 		const validPassword = await new Argon2id().verify(existingUser.hashedPassword, password);
 		if (!validPassword) {
