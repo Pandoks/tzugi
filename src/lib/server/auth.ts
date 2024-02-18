@@ -35,15 +35,17 @@ interface DatabaseUserAttributes {
 }
 
 export const createPasswordResetToken = async (userId: string): Promise<string> => {
-	// invalidate all existing tokens
-	await db.delete(passwordResets).where(eq(passwordResets.userId, userId));
+	return await db.transaction(async (tx) => {
+		// invalidate all existing tokens (only one password reset token)
+		await tx.delete(passwordResets).where(eq(passwordResets.userId, userId));
 
-	const tokenId = generateId(40);
-	await db
-		.insert(passwordResets)
-		.values({ id: tokenId, userId: userId, expiresAt: createDate(new TimeSpan(1, 'h')) });
+		const tokenId = generateId(40);
+		await tx
+			.insert(passwordResets)
+			.values({ id: tokenId, userId: userId, expiresAt: createDate(new TimeSpan(1, 'h')) });
 
-	return tokenId;
+		return tokenId;
+	});
 };
 
 export const isValidDeviceCookie = async (
