@@ -55,9 +55,11 @@ export const isValidDeviceCookie = async (
 ) => {
 	if (!deviceCookieId) return false;
 
-	const deviceCookieAttributes = (
-		await db.select().from(deviceCookies).where(eq(deviceCookies.id, deviceCookieId)).limit(1)
-	)[0];
+	const [deviceCookieAttributes] = await db
+		.select()
+		.from(deviceCookies)
+		.where(eq(deviceCookies.id, deviceCookieId))
+		.limit(1);
 	if (!deviceCookieAttributes) {
 		return false;
 	}
@@ -68,23 +70,17 @@ export const isValidDeviceCookie = async (
 		return false;
 	}
 
-	try {
-		await db
-			.insert(deviceCookies)
-			.values({
-				id: deviceCookieId,
-				username: username,
-				attempts: currentAttempts
-			})
-			.onConflictDoUpdate({
-				target: [deviceCookies.id, deviceCookies.username],
-				set: { attempts: currentAttempts }
-			});
-	} catch {
-		return fail(400, {
-			message: 'Database insert/update error'
+	await db
+		.insert(deviceCookies)
+		.values({
+			id: deviceCookieId,
+			username: username,
+			attempts: currentAttempts
+		})
+		.onConflictDoUpdate({
+			target: [deviceCookies.id, deviceCookies.username],
+			set: { attempts: currentAttempts }
 		});
-	}
 
 	return true;
 };
