@@ -2,6 +2,7 @@ import {
 	bigint,
 	boolean,
 	integer,
+	pgEnum,
 	pgTable,
 	primaryKey,
 	serial,
@@ -53,7 +54,8 @@ export const passwordResets = pgTable('password_resets', {
 	}).notNull()
 });
 
-export const loginTimeouts = pgTable('login_timeouts', {
+export const timeoutEnum = pgEnum('timeout', ['login', 'password-reset', 'signup']);
+export const timeouts = pgTable('timeouts', {
 	ip: text('ip').notNull().primaryKey(),
 	timeoutUntil: bigint('timeout_until', { mode: 'number' }).notNull(),
 	timeoutSeconds: bigint('timeout_seconds', { mode: 'number' }).notNull().default(0)

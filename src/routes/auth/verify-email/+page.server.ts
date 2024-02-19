@@ -4,6 +4,15 @@ import { lucia } from '$lib/server/auth';
 import { verifyVerificationCode } from '$lib/server/email';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
+import type { PageServerLoad, PageServerLoadEvent } from './$types';
+
+export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
+	if (!event.locals.user) {
+		return redirect(302, '/auth/login');
+	}
+
+	return { username: event.locals.user.username };
+};
 
 export const actions: Actions = {
 	default: async (event) => {
@@ -11,6 +20,9 @@ export const actions: Actions = {
 			return fail(401);
 		}
 		const user = event.locals.user;
+		if (user.emailVerified) {
+			return redirect(302, '/');
+		}
 
 		const formData = await event.request.formData();
 		const verificationCode = formData.get('verification-code');

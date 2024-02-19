@@ -1,6 +1,6 @@
 import { dev } from '$app/environment';
 import { db } from '$lib/db';
-import { deviceCookies, loginTimeouts, users } from '$lib/db/schema';
+import { deviceCookies, timeouts, users } from '$lib/db/schema';
 import { isValidDeviceCookie, lucia } from '$lib/server/auth';
 import { emailSchema, passwordSchema, usernameSchema } from '$lib/server/validation';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
@@ -30,8 +30,8 @@ export const actions: Actions = {
 			const valid = await db.transaction(async (tx) => {
 				const [storedTimeout] = await tx
 					.select()
-					.from(loginTimeouts)
-					.where(eq(loginTimeouts.ip, event.getClientAddress()))
+					.from(timeouts)
+					.where(eq(timeouts.ip, event.getClientAddress()))
 					.limit(1);
 				const timeoutUntil = storedTimeout?.timeoutUntil ?? 0;
 				console.log(Date.now(), timeoutUntil);
@@ -41,14 +41,14 @@ export const actions: Actions = {
 
 				const timeoutSeconds = storedTimeout ? storedTimeout.timeoutSeconds * 2 : 1;
 				await tx
-					.insert(loginTimeouts)
+					.insert(timeouts)
 					.values({
 						ip: event.getClientAddress(),
 						timeoutUntil: Date.now() + timeoutSeconds * 1000,
 						timeoutSeconds: timeoutSeconds
 					})
 					.onConflictDoUpdate({
-						target: loginTimeouts.ip,
+						target: timeouts.ip,
 						set: {
 							timeoutUntil: Date.now() + timeoutSeconds * 1000,
 							timeoutSeconds: timeoutSeconds
@@ -99,7 +99,7 @@ export const actions: Actions = {
 		if (!validDeviceCookie) {
 			try {
 				// delete login throttling after successful login
-				await db.delete(loginTimeouts).where(eq(loginTimeouts.ip, event.getClientAddress()));
+				await db.delete(timeouts).where(eq(timeouts.ip, event.getClientAddress()));
 			} catch {
 				return fail(400, {
 					message: 'Database deletion error'
