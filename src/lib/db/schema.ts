@@ -55,16 +55,24 @@ export const passwordResets = pgTable('password_resets', {
 });
 
 export const timeoutEnum = pgEnum('timeout', ['login', 'password-reset', 'signup']);
-export const timeouts = pgTable('timeouts', {
-	ip: text('ip').notNull().primaryKey(),
-	type: timeoutEnum('type').notNull(),
-	timeoutUntil: bigint('timeout_until', { mode: 'number' }).notNull(),
-	timeoutSeconds: bigint('timeout_seconds', { mode: 'number' }).notNull().default(0),
-	expiresAt: timestamp('expires_at', {
-		withTimezone: true,
-		mode: 'date'
-	})
-});
+export const timeouts = pgTable(
+	'timeouts',
+	{
+		ip: text('ip').notNull(),
+		type: timeoutEnum('type').notNull(),
+		timeoutUntil: bigint('timeout_until', { mode: 'number' }).notNull(),
+		timeoutSeconds: bigint('timeout_seconds', { mode: 'number' }).notNull().default(0),
+		expiresAt: timestamp('expires_at', {
+			withTimezone: true,
+			mode: 'date'
+		})
+	},
+	(table) => {
+		return {
+			pk: primaryKey({ columns: [table.ip, table.type] })
+		};
+	}
+);
 
 export const deviceCookies = pgTable(
 	'device_cookies',
