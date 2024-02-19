@@ -88,6 +88,7 @@ export const actions: Actions = {
 			});
 		}
 
+		// delete throttle after an hour
 		await db.transaction(async (tx) => {
 			const [timeout] = await tx
 				.select()

@@ -6,6 +6,7 @@ import { emailSchema } from '$lib/server/validation';
 import { fail, type Actions } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import { HOST } from '$env/static/private';
+import { isWithinExpirationDate } from 'oslo';
 
 export const actions: Actions = {
 	default: async (event) => {
@@ -45,6 +46,17 @@ export const actions: Actions = {
 		if (!valid) {
 			return fail(429);
 		}
+		// delete throttle after an hour
+		await db.transaction(async (tx) => {
+			const [timeout] = await tx
+				.select()
+				.from(timeouts)
+				.where(and(eq(timeouts.ip, ip), eq(timeouts.type, 'password-reset')))
+				.limit(1);
+			if (timeout && !isWithinExpirationDate(timeout.expiresAt!)) {
+				tx.delete(timeouts).where(and(eq(timeouts.ip, ip), eq(timeouts.type, 'password-reset')));
+			}
+		});
 
 		// or find the user by their cookie if they're logged in already
 		if (!emailSchema.safeParse(formData.get('email')).success) {
