@@ -20,7 +20,6 @@ export const actions: Actions = {
 			5
 		);
 		if (!validDeviceCookie) {
-			console.log('test');
 			event.cookies.set('device_cookie', '', {
 				path: '/',
 				secure: !dev,
@@ -34,7 +33,6 @@ export const actions: Actions = {
 					.where(and(eq(timeouts.ip, event.getClientAddress()), eq(timeouts.type, 'login')))
 					.limit(1);
 				const timeoutUntil = storedTimeout?.timeoutUntil ?? 0;
-				console.log(Date.now(), timeoutUntil);
 				if (Date.now() < timeoutUntil) {
 					return false;
 				}
