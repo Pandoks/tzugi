@@ -12,10 +12,11 @@ export const lucia = new Lucia(luciaAdapter, {
 		}
 	},
 	getUserAttributes: (attributes) => {
+		// console.log(attributes);
 		return {
 			username: attributes.username,
 			email: attributes.email,
-			emailVerified: attributes.email_verified
+			emailVerified: attributes.emailVerified
 		};
 	}
 });
@@ -30,7 +31,7 @@ declare module 'lucia' {
 interface DatabaseUserAttributes {
 	username: string;
 	email: string;
-	email_verified: boolean;
+	emailVerified: boolean;
 }
 
 export const createPasswordResetToken = async (userId: string): Promise<string> => {

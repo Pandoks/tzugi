@@ -7,6 +7,14 @@ import { fail, type Actions, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import { alphabet, generateRandomString } from 'oslo/crypto';
 import { Argon2id } from 'oslo/password';
+import type { PageServerLoad, PageServerLoadEvent } from './$types';
+
+export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
+	if (event.locals.user) {
+		return redirect(302, '/');
+	}
+	return {};
+};
 
 export const actions: Actions = {
 	default: async (event) => {
