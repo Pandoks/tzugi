@@ -14,27 +14,29 @@ export const actions: Actions = {
 
 		// login throttling (prevent brute force/DOS)
 		const storedDeviceCookieId = event.cookies.get('device_cookie') ?? null;
-		const validDeviceCookie = isValidDeviceCookie(
+		const validDeviceCookie = await isValidDeviceCookie(
 			storedDeviceCookieId,
 			formData.get('username') as string,
 			5
 		);
 		if (!validDeviceCookie) {
+			console.log('test');
 			event.cookies.set('device_cookie', '', {
 				path: '/',
 				secure: !dev,
 				maxAge: 0,
 				httpOnly: true
 			});
-			await db.transaction(async (tx) => {
+			const valid = await db.transaction(async (tx) => {
 				const [storedTimeout] = await tx
 					.select()
 					.from(loginTimeouts)
 					.where(eq(loginTimeouts.ip, event.getClientAddress()))
 					.limit(1);
 				const timeoutUntil = storedTimeout?.timeoutUntil ?? 0;
+				console.log(Date.now(), timeoutUntil);
 				if (Date.now() < timeoutUntil) {
-					return fail(429);
+					return false;
 				}
 
 				const timeoutSeconds = storedTimeout ? storedTimeout.timeoutSeconds * 2 : 1;
@@ -52,7 +54,13 @@ export const actions: Actions = {
 							timeoutSeconds: timeoutSeconds
 						}
 					});
+
+				return true;
 			});
+
+			if (!valid) {
+				return fail(429);
+			}
 		}
 
 		// handle login
