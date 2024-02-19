@@ -18,9 +18,7 @@ export const actions: Actions = {
 		const newPassword = formData.get('new-password') as string;
 		const verificationToken = event.params.slug;
 		if (!verificationToken) {
-			return fail(404, {
-				message: 'Invalid password'
-			});
+			return fail(404);
 		}
 
 		let token: { id: string; userId: string; expiresAt: Date } | undefined;

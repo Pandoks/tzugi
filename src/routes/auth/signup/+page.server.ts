@@ -3,11 +3,12 @@ import { timeouts, users } from '$lib/db/schema';
 import { lucia } from '$lib/server/auth';
 import { emailSchema, passwordSchema, usernameSchema } from '$lib/server/validation';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
-import { generateId } from 'lucia';
+import { TimeSpan, generateId } from 'lucia';
 import { Argon2id } from 'oslo/password';
 import { generateEmailVerificationCode, sendVerificationCode } from '$lib/server/email';
 import type { PageServerLoad, PageServerLoadEvent } from './$types';
 import { and, eq } from 'drizzle-orm';
+import { createDate, isWithinExpirationDate } from 'oslo';
 
 export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
 	if (event.locals.user) {
@@ -40,7 +41,8 @@ export const actions: Actions = {
 					ip: ip,
 					type: 'signup',
 					timeoutUntil: Date.now() + timeoutSeconds * 1000,
-					timeoutSeconds: timeoutSeconds
+					timeoutSeconds: timeoutSeconds,
+					expiresAt: createDate(new TimeSpan(1, 'h'))
 				})
 				.onConflictDoUpdate({
 					target: [timeouts.ip, timeouts.type],
@@ -85,6 +87,17 @@ export const actions: Actions = {
 				message: 'Username or email already exists'
 			});
 		}
+
+		await db.transaction(async (tx) => {
+			const [timeout] = await tx
+				.select()
+				.from(timeouts)
+				.where(and(eq(timeouts.ip, ip), eq(timeouts.type, 'signup')))
+				.limit(1);
+			if (timeout && !isWithinExpirationDate(timeout.expiresAt!)) {
+				tx.delete(timeouts).where(and(eq(timeouts.ip, ip), eq(timeouts.type, 'signup')));
+			}
+		});
 
 		const verificationCode = await generateEmailVerificationCode(userId, email);
 		// TODO: Make sure you implement rate limiting based on user ID and IP address

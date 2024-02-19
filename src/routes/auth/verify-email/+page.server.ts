@@ -9,6 +9,8 @@ import type { PageServerLoad, PageServerLoadEvent } from './$types';
 export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
 	if (!event.locals.user) {
 		return redirect(302, '/auth/login');
+	} else if (event.locals.user.emailVerified) {
+		return redirect(302, '/');
 	}
 
 	return { username: event.locals.user.username };
@@ -16,12 +18,9 @@ export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
 
 export const actions: Actions = {
 	default: async (event) => {
-		if (!event.locals.user) {
-			return fail(401);
-		}
 		const user = event.locals.user;
-		if (user.emailVerified) {
-			return redirect(302, '/');
+		if (!user) {
+			return fail(401);
 		}
 
 		const formData = await event.request.formData();

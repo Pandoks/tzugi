@@ -59,7 +59,11 @@ export const timeouts = pgTable('timeouts', {
 	ip: text('ip').notNull().primaryKey(),
 	type: timeoutEnum('type').notNull(),
 	timeoutUntil: bigint('timeout_until', { mode: 'number' }).notNull(),
-	timeoutSeconds: bigint('timeout_seconds', { mode: 'number' }).notNull().default(0)
+	timeoutSeconds: bigint('timeout_seconds', { mode: 'number' }).notNull().default(0),
+	expiresAt: timestamp('expires_at', {
+		withTimezone: true,
+		mode: 'date'
+	})
 });
 
 export const deviceCookies = pgTable(
