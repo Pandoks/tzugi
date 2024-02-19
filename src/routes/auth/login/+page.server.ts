@@ -11,7 +11,8 @@ import { Argon2id } from 'oslo/password';
 export const actions: Actions = {
 	default: async (event) => {
 		const formData = await event.request.formData();
-		const ip = event.locals.ip;
+		const ip = event.getClientAddress();
+		console.log('ip:', ip);
 
 		// login throttling based off of ip (prevent brute force/DOS)
 		const storedDeviceCookieId = event.cookies.get('device_cookie') ?? null;
@@ -21,22 +22,27 @@ export const actions: Actions = {
 			5
 		);
 		if (!validDeviceCookie) {
+			console.log('Bad cookie');
 			event.cookies.set('device_cookie', '', {
 				path: '/',
 				secure: !dev,
 				maxAge: 0,
 				httpOnly: true
 			});
+			console.log('Set cookie');
 			const valid = await db.transaction(async (tx) => {
 				const [storedTimeout] = await tx
 					.select()
 					.from(timeouts)
 					.where(and(eq(timeouts.ip, ip), eq(timeouts.type, 'login')))
 					.limit(1);
+				console.log('query');
 				const timeoutUntil = storedTimeout?.timeoutUntil ?? 0;
 				if (Date.now() < timeoutUntil) {
 					return false;
 				}
+
+				console.log('throttle');
 
 				const timeoutSeconds = storedTimeout ? storedTimeout.timeoutSeconds * 2 : 1;
 				await tx
@@ -59,9 +65,12 @@ export const actions: Actions = {
 			});
 
 			if (!valid) {
+				console.log('Too many request');
 				return fail(429);
 			}
 		}
+
+		console.log('Good cookie');
 
 		// handle login
 		if (
