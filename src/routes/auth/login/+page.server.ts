@@ -11,8 +11,9 @@ import { Argon2id } from 'oslo/password';
 export const actions: Actions = {
 	default: async (event) => {
 		const formData = await event.request.formData();
+		const ip = event.locals.ip;
 
-		// login throttling (prevent brute force/DOS)
+		// login throttling based off of ip (prevent brute force/DOS)
 		const storedDeviceCookieId = event.cookies.get('device_cookie') ?? null;
 		const validDeviceCookie = await isValidDeviceCookie(
 			storedDeviceCookieId,
@@ -30,7 +31,7 @@ export const actions: Actions = {
 				const [storedTimeout] = await tx
 					.select()
 					.from(timeouts)
-					.where(and(eq(timeouts.ip, event.getClientAddress()), eq(timeouts.type, 'login')))
+					.where(and(eq(timeouts.ip, ip), eq(timeouts.type, 'login')))
 					.limit(1);
 				const timeoutUntil = storedTimeout?.timeoutUntil ?? 0;
 				if (Date.now() < timeoutUntil) {
@@ -41,7 +42,7 @@ export const actions: Actions = {
 				await tx
 					.insert(timeouts)
 					.values({
-						ip: event.getClientAddress(),
+						ip: ip,
 						type: 'login',
 						timeoutUntil: Date.now() + timeoutSeconds * 1000,
 						timeoutSeconds: timeoutSeconds
@@ -98,9 +99,7 @@ export const actions: Actions = {
 		if (!validDeviceCookie) {
 			try {
 				// delete login throttling after successful login
-				await db
-					.delete(timeouts)
-					.where(and(eq(timeouts.ip, event.getClientAddress()), eq(timeouts.type, 'login')));
+				await db.delete(timeouts).where(and(eq(timeouts.ip, ip), eq(timeouts.type, 'login')));
 			} catch {
 				return fail(400, {
 					message: 'Database deletion error'

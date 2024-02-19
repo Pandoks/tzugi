@@ -21,7 +21,7 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 
 		// signup throttling based on ip
-		const ip = event.getClientAddress();
+		const ip = event.locals.ip;
 		const valid = await db.transaction(async (tx) => {
 			const [timeout] = await tx
 				.select()
