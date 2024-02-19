@@ -31,7 +31,7 @@ export const actions: Actions = {
 				const [storedTimeout] = await tx
 					.select()
 					.from(timeouts)
-					.where(eq(timeouts.ip, event.getClientAddress()))
+					.where(and(eq(timeouts.ip, event.getClientAddress()), eq(timeouts.type, 'login')))
 					.limit(1);
 				const timeoutUntil = storedTimeout?.timeoutUntil ?? 0;
 				console.log(Date.now(), timeoutUntil);
@@ -44,11 +44,12 @@ export const actions: Actions = {
 					.insert(timeouts)
 					.values({
 						ip: event.getClientAddress(),
+						type: 'login',
 						timeoutUntil: Date.now() + timeoutSeconds * 1000,
 						timeoutSeconds: timeoutSeconds
 					})
 					.onConflictDoUpdate({
-						target: timeouts.ip,
+						target: [timeouts.ip, timeouts.type],
 						set: {
 							timeoutUntil: Date.now() + timeoutSeconds * 1000,
 							timeoutSeconds: timeoutSeconds
@@ -99,7 +100,9 @@ export const actions: Actions = {
 		if (!validDeviceCookie) {
 			try {
 				// delete login throttling after successful login
-				await db.delete(timeouts).where(eq(timeouts.ip, event.getClientAddress()));
+				await db
+					.delete(timeouts)
+					.where(and(eq(timeouts.ip, event.getClientAddress()), eq(timeouts.type, 'login')));
 			} catch {
 				return fail(400, {
 					message: 'Database deletion error'
