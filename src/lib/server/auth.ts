@@ -1,7 +1,6 @@
 import { dev } from '$app/environment';
 import { db, luciaAdapter } from '$lib/db';
 import { deviceCookies, passwordResets } from '$lib/db/schema';
-import { fail } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { Lucia, generateId } from 'lucia';
 import { TimeSpan, createDate } from 'oslo';

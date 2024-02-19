@@ -53,22 +53,11 @@ export const passwordResets = pgTable('password_resets', {
 	}).notNull()
 });
 
-export const loginTimeouts = pgTable(
-	'login_timeouts',
-	{
-		username: text('username')
-			.notNull()
-			.references(() => users.id),
-		ip: text('ip').notNull(),
-		timeoutUntil: bigint('timeout_until', { mode: 'number' }).notNull(),
-		timeoutSeconds: bigint('timeout_seconds', { mode: 'number' }).notNull().default(0)
-	},
-	(table) => {
-		return {
-			pk: primaryKey({ columns: [table.username, table.ip] })
-		};
-	}
-);
+export const loginTimeouts = pgTable('login_timeouts', {
+	ip: text('ip').notNull().primaryKey(),
+	timeoutUntil: bigint('timeout_until', { mode: 'number' }).notNull(),
+	timeoutSeconds: bigint('timeout_seconds', { mode: 'number' }).notNull().default(0)
+});
 
 export const deviceCookies = pgTable(
 	'device_cookies',
