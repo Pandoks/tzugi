@@ -5,6 +5,7 @@ import { sendPasswordResetToken } from '$lib/server/email';
 import { emailSchema } from '$lib/server/validation';
 import { fail, type Actions } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
+import { HOST } from '$env/static/private';
 
 export const actions: Actions = {
 	default: async (event) => {
@@ -26,7 +27,7 @@ export const actions: Actions = {
 		}
 
 		const verificationToken = await createPasswordResetToken(user.id);
-		const verificationLink = 'http://localhost:3000/auth/reset-password/' + verificationToken;
+		const verificationLink = HOST + verificationToken;
 
 		await sendPasswordResetToken(email, verificationLink);
 		return new Response(null, {
