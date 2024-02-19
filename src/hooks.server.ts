@@ -29,6 +29,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// let's you check if the user is logged in or not
 	event.locals.user = user;
 	event.locals.session = session;
+	event.locals.ip = event.getClientAddress();
 
 	return resolve(event);
 };
