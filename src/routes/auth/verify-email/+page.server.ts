@@ -64,8 +64,9 @@ export const actions: Actions = {
 		}
 
 		const verificationCode = formData.get('verification-code');
+		const validCode = await verifyVerificationCode(user, verificationCode as string);
 
-		if (typeof verificationCode !== 'string' || !verifyVerificationCode(user, verificationCode)) {
+		if (typeof verificationCode !== 'string' || !validCode) {
 			return fail(404);
 		}
 
