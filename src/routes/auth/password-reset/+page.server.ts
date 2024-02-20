@@ -6,7 +6,8 @@ import { emailSchema } from '$lib/server/validation';
 import { fail, type Actions } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import { HOST } from '$env/static/private';
-import { isWithinExpirationDate } from 'oslo';
+import { createDate, isWithinExpirationDate } from 'oslo';
+import { TimeSpan } from 'lucia';
 
 export const actions: Actions = {
 	default: async (event) => {
@@ -32,7 +33,8 @@ export const actions: Actions = {
 					ip: ip,
 					type: 'password-reset',
 					timeoutUntil: Date.now() + timeoutSeconds * 1000,
-					timeoutSeconds: timeoutSeconds
+					timeoutSeconds: timeoutSeconds,
+					expiresAt: createDate(new TimeSpan(1, 'h'))
 				})
 				.onConflictDoUpdate({
 					target: [timeouts.ip, timeouts.type],
@@ -77,8 +79,6 @@ export const actions: Actions = {
 		const verificationLink = HOST + verificationToken;
 
 		await sendPasswordResetToken(email, verificationLink);
-		return new Response(null, {
-			status: 200
-		});
+		return { success: true };
 	}
 };

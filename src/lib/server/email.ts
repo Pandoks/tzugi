@@ -25,6 +25,8 @@ export const generateEmailVerificationCode = async (
 
 // TODO
 export const sendVerificationCode = async (email: string, verificationCode: string) => {
+	console.log('email: ', email);
+	console.log('verification code: ', verificationCode);
 	return;
 };
 
@@ -60,5 +62,7 @@ export const verifyVerificationCode = async (user: User, code: string): Promise<
 
 // TODO
 export const sendPasswordResetToken = async (email: string, verificationLink: string) => {
+	console.log('email: ', email);
+	console.log('verification link: ', verificationLink);
 	return;
 };

@@ -6,6 +6,17 @@ import { fail, type Actions, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { isWithinExpirationDate } from 'oslo';
 import { Argon2id } from 'oslo/password';
+import type { PageServerLoad, PageServerLoadEvent } from './$types';
+
+export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
+	const verificationToken = event.params.slug;
+	const [token] = await db
+		.select()
+		.from(passwordResets)
+		.where(eq(passwordResets.id, verificationToken))
+		.limit(1);
+	if (!token) return redirect(302, '/auth/login');
+};
 
 export const actions: Actions = {
 	default: async (event) => {
