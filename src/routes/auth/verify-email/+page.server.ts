@@ -1,10 +1,12 @@
 import { db } from '$lib/db';
-import { users } from '$lib/db/schema';
+import { timeouts, users } from '$lib/db/schema';
 import { lucia } from '$lib/server/auth';
 import { verifyVerificationCode } from '$lib/server/email';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import type { PageServerLoad, PageServerLoadEvent } from './$types';
+import { createDate, isWithinExpirationDate } from 'oslo';
+import { TimeSpan } from 'lucia';
 
 export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
 	if (!event.locals.user) {
@@ -24,6 +26,43 @@ export const actions: Actions = {
 		}
 
 		const formData = await event.request.formData();
+
+		// email verification throttling based on ip
+		const ip = event.getClientAddress();
+		const valid = await db.transaction(async (tx) => {
+			const [timeout] = await tx
+				.select()
+				.from(timeouts)
+				.where(and(eq(timeouts.ip, ip), eq(timeouts.type, 'email-verification')))
+				.limit(1);
+			const timeoutUntil = timeout?.timeoutUntil ?? 0;
+			if (Date.now() < timeoutUntil) {
+				return false;
+			}
+
+			const timeoutSeconds = timeout ? timeout.timeoutSeconds * 2 : 1;
+			await tx
+				.insert(timeouts)
+				.values({
+					ip: ip,
+					type: 'email-verification',
+					timeoutUntil: Date.now() + timeoutSeconds * 1000,
+					timeoutSeconds: timeoutSeconds,
+					expiresAt: createDate(new TimeSpan(1, 'h'))
+				})
+				.onConflictDoUpdate({
+					target: [timeouts.ip, timeouts.type],
+					set: {
+						timeoutUntil: Date.now() + timeoutSeconds * 1000,
+						timeoutSeconds: timeoutSeconds
+					}
+				});
+			return true;
+		});
+		if (!valid) {
+			return fail(429);
+		}
+
 		const verificationCode = formData.get('verification-code');
 
 		if (typeof verificationCode !== 'string' || !verifyVerificationCode(user, verificationCode)) {
@@ -38,6 +77,20 @@ export const actions: Actions = {
 				message: 'Database error'
 			});
 		}
+
+		// delete throttle after an hour
+		await db.transaction(async (tx) => {
+			const [timeout] = await tx
+				.select()
+				.from(timeouts)
+				.where(and(eq(timeouts.ip, ip), eq(timeouts.type, 'email-verification')))
+				.limit(1);
+			if (timeout && !isWithinExpirationDate(timeout.expiresAt!)) {
+				tx.delete(timeouts).where(
+					and(eq(timeouts.ip, ip), eq(timeouts.type, 'email-verification'))
+				);
+			}
+		});
 
 		const session = await lucia.createSession(user.id, {});
 		const sessionCookie = lucia.createSessionCookie(session.id);

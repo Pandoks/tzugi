@@ -54,7 +54,12 @@ export const passwordResets = pgTable('password_resets', {
 	}).notNull()
 });
 
-export const timeoutEnum = pgEnum('timeout', ['login', 'password-reset', 'signup']);
+export const timeoutEnum = pgEnum('timeout', [
+	'login',
+	'password-reset',
+	'signup',
+	'email-verification'
+]);
 export const timeouts = pgTable(
 	'timeouts',
 	{
