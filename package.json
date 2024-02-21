@@ -14,7 +14,7 @@
 		"test:integration": "playwright test",
 		"test:unit": "vitest",
 		"db:push": "drizzle-kit push:pg",
-    "db:pull": "drizzle-kit introspect:pg",
+		"db:pull": "drizzle-kit introspect:pg",
 		"db:generate": "drizzle-kit generate:pg",
 		"db:studio": "drizzle-kit studio"
 	},
@@ -48,6 +48,7 @@
 		"@lucia-auth/adapter-drizzle": "^1.0.1",
 		"drizzle-orm": "^0.29.3",
 		"lucia": "^3.0.1",
+		"nodemailer": "^6.9.9",
 		"oslo": "^1.1.1",
 		"postgres": "^3.4.3",
 		"zod": "^3.22.4"
