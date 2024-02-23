@@ -6,8 +6,6 @@ const DB_HOST = process.env.DB_HOST;
 const DB_PORT = process.env.DB_PORT;
 const DB_DATABASE = process.env.DB_DATABASE;
 
-console.log(DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT, DB_DATABASE);
-
 if (
 	!DB_USERNAME ||
 	DB_PASSWORD === undefined ||
@@ -28,7 +26,7 @@ export default defineConfig({
 		password: DB_PASSWORD,
 		host: DB_HOST,
 		port: parseInt(DB_PORT),
-		database: DB_DATABASE
+		database: DB_DATABASE // add SSL when drizzle supports it
 	},
 	verbose: true,
 	strict: true

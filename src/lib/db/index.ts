@@ -21,7 +21,7 @@ const client = postgres({
 	host: DB_HOST,
 	port: parseInt(DB_PORT),
 	database: DB_DATABASE,
-	prepare: false
+	prepare: false // add SSL when drizzle supports it
 });
 export const db = drizzle(client);
 
