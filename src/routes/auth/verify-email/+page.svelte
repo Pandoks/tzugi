@@ -1,10 +1,18 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import * as Card from '$lib/components/ui/card';
+	import type { PageData } from './$types';
+	import VerifyEmail from './verify-email.svelte';
+
+	export let data: PageData;
 </script>
 
-<h1>Verification Code</h1>
-<form method="post" use:enhance>
-	<label for="verification-code">Verification Code</label>
-	<input type="text" name="verification-code" id="verification-code" /><br />
-	<button>Verify</button>
-</form>
+<div class="flex justify-center items-center h-screen">
+	<Card.Root class="w-[350px]">
+		<Card.Header>
+			<Card.Title>Email Verification</Card.Title>
+		</Card.Header>
+		<Card.Content>
+			<VerifyEmail data={data.form} />
+		</Card.Content>
+	</Card.Root>
+</div>

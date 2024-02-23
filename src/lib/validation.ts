@@ -25,3 +25,8 @@ export const loginFormSchema = z.object({
 	password: passwordSchema
 });
 export type LoginFormSchema = typeof loginFormSchema;
+
+export const verifyEmailFormSchema = z.object({
+	code: z.string()
+});
+export type VerifyEmailFormSchema = typeof verifyEmailFormSchema;

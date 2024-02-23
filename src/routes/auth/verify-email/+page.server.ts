@@ -7,6 +7,9 @@ import { and, eq } from 'drizzle-orm';
 import type { PageServerLoad, PageServerLoadEvent } from './$types';
 import { createDate, isWithinExpirationDate } from 'oslo';
 import { TimeSpan } from 'lucia';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
+import { verifyEmailFormSchema } from '$lib/validation';
 
 export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
 	if (!event.locals.user) {
@@ -15,7 +18,10 @@ export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
 		return redirect(302, '/');
 	}
 
-	return { username: event.locals.user.username };
+	return {
+		username: event.locals.user.username,
+		form: await superValidate(zod(verifyEmailFormSchema))
+	};
 };
 
 export const actions: Actions = {
