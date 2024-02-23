@@ -18,7 +18,6 @@
 			<Form.Label>Username</Form.Label>
 			<Input {...attrs} bind:value={$formData.username} />
 		</Form.Control>
-		<Form.Description>This is your public display name.</Form.Description>
 		<Form.FieldErrors />
 	</Form.Field>
 	<Form.Field {form} name="email">
@@ -26,7 +25,6 @@
 			<Form.Label>Email</Form.Label>
 			<Input {...attrs} bind:value={$formData.email} />
 		</Form.Control>
-		<Form.Description>This is your email.</Form.Description>
 		<Form.FieldErrors />
 	</Form.Field>
 	<Form.Field {form} name="password">
@@ -34,7 +32,6 @@
 			<Form.Label>Password</Form.Label>
 			<Input {...attrs} bind:value={$formData.password} type="password" />
 		</Form.Control>
-		<Form.Description>This is your password.</Form.Description>
 		<Form.FieldErrors />
 	</Form.Field>
 	<Form.Button>Submit</Form.Button>
