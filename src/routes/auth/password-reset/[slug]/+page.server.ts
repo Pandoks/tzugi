@@ -1,7 +1,7 @@
 import { db } from '$lib/db';
 import { passwordResets, users } from '$lib/db/schema';
 import { lucia } from '$lib/server/auth';
-import { passwordSchema } from '$lib/server/validation';
+import { passwordSchema } from '$lib/validation';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { isWithinExpirationDate } from 'oslo';

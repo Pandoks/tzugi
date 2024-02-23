@@ -2,7 +2,7 @@ import { dev } from '$app/environment';
 import { db } from '$lib/db';
 import { deviceCookies, timeouts, users } from '$lib/db/schema';
 import { isValidDeviceCookie, lucia } from '$lib/server/auth';
-import { emailSchema, passwordSchema, usernameSchema } from '$lib/server/validation';
+import { emailSchema, passwordSchema, usernameSchema } from '$lib/validation';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import { alphabet, generateRandomString } from 'oslo/crypto';

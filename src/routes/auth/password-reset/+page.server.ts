@@ -2,7 +2,7 @@ import { db } from '$lib/db';
 import { timeouts, users } from '$lib/db/schema';
 import { createPasswordResetToken } from '$lib/server/auth';
 import { sendPasswordResetToken } from '$lib/server/email';
-import { emailSchema } from '$lib/server/validation';
+import { emailSchema } from '$lib/validation';
 import { fail, type Actions } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import { createDate, isWithinExpirationDate } from 'oslo';

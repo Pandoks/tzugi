@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import type { User } from 'lucia';
 import { TimeSpan, createDate, isWithinExpirationDate } from 'oslo';
 import { alphabet, generateRandomString } from 'oslo/crypto';
-import { emailCodeSchema } from './validation';
+import { emailCodeSchema } from '$lib/validation';
 
 export const generateEmailVerificationCode = async (
 	userId: string,

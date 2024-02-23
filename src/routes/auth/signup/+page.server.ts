@@ -1,12 +1,7 @@
 import { db } from '$lib/db';
 import { timeouts, users } from '$lib/db/schema';
 import { lucia } from '$lib/server/auth';
-import {
-	emailSchema,
-	passwordSchema,
-	signupFormSchema,
-	usernameSchema
-} from '$lib/server/validation';
+import { emailSchema, passwordSchema, signupFormSchema, usernameSchema } from '$lib/validation';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
 import { TimeSpan, generateId } from 'lucia';
 import { Argon2id } from 'oslo/password';
