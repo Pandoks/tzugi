@@ -31,7 +31,12 @@ export const verifyEmailFormSchema = z.object({
 });
 export type VerifyEmailFormSchema = typeof verifyEmailFormSchema;
 
-export const passwordResetFormSchema = z.object({
+export const passwordResetEmailFormSchema = z.object({
 	email: emailSchema
 });
-export type PasswordResetFormSchema = typeof passwordResetFormSchema;
+export type PasswordResetEmailFormSchema = typeof passwordResetEmailFormSchema;
+
+export const passwordResetPasswordFormSchema = z.object({
+	password: passwordSchema
+});
+export type PasswordResetPasswordFormSchema = typeof passwordResetPasswordFormSchema;

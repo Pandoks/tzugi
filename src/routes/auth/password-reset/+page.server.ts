@@ -2,7 +2,7 @@ import { db } from '$lib/db';
 import { timeouts, users } from '$lib/db/schema';
 import { createPasswordResetToken } from '$lib/server/auth';
 import { sendPasswordResetToken } from '$lib/server/email';
-import { emailSchema, passwordResetFormSchema } from '$lib/validation';
+import { emailSchema, passwordResetEmailFormSchema } from '$lib/validation';
 import { fail, type Actions } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import { createDate, isWithinExpirationDate } from 'oslo';
@@ -12,7 +12,7 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
-	return { form: await superValidate(zod(passwordResetFormSchema)) };
+	return { form: await superValidate(zod(passwordResetEmailFormSchema)) };
 };
 
 export const actions: Actions = {

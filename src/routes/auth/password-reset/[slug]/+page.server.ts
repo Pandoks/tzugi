@@ -1,12 +1,14 @@
 import { db } from '$lib/db';
 import { passwordResets, users } from '$lib/db/schema';
 import { lucia } from '$lib/server/auth';
-import { passwordSchema } from '$lib/validation';
+import { passwordResetPasswordFormSchema, passwordSchema } from '$lib/validation';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { isWithinExpirationDate } from 'oslo';
 import { Argon2id } from 'oslo/password';
 import type { PageServerLoad, PageServerLoadEvent } from './$types';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
 	const verificationToken = event.params.slug;
@@ -16,6 +18,7 @@ export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
 		.where(eq(passwordResets.id, verificationToken))
 		.limit(1);
 	if (!token) return redirect(302, '/auth/login');
+	return { form: await superValidate(zod(passwordResetPasswordFormSchema)) };
 };
 
 export const actions: Actions = {

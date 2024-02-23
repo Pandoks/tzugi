@@ -1,10 +1,18 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import * as Card from '$lib/components/ui/card';
+	import type { PageData } from './$types';
+	import PasswordReset from './password-reset.svelte';
+
+	export let data: PageData;
 </script>
 
-<h1>New Password</h1>
-<form method="post" use:enhance>
-	<label for="new-password">Password</label>
-	<input type="new-password" name="new-password" id="new-password" /><br />
-	<button>Continue</button>
-</form>
+<div class="flex justify-center items-center h-screen">
+	<Card.Root class="w-[350px]">
+		<Card.Header>
+			<Card.Title>Password Reset</Card.Title>
+		</Card.Header>
+		<Card.Content>
+			<PasswordReset data={data.form} />
+		</Card.Content>
+	</Card.Root>
+</div>
