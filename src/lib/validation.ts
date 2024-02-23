@@ -18,3 +18,10 @@ export const signupFormSchema = z.object({
 	password: passwordSchema
 });
 export type SignupFormSchema = typeof signupFormSchema;
+
+export const loginFormSchema = z.object({
+	username: usernameSchema,
+	email: emailSchema,
+	password: passwordSchema
+});
+export type LoginFormSchema = typeof loginFormSchema;

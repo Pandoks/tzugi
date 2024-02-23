@@ -1,14 +1,18 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import * as Card from '$lib/components/ui/card';
+	import type { PageData } from './$types';
+	import LoginForm from './login-form.svelte';
+
+	export let data: PageData;
 </script>
 
-<h1>Sign in</h1>
-<form method="post" use:enhance>
-	<label for="username">Username</label>
-	<input type="text" name="username" id="username" /><br />
-	<label for="email">Email</label>
-	<input type="email" name="email" id="email" /><br />
-	<label for="password">Password</label>
-	<input type="password" name="password" id="password" /><br />
-	<button>Continue</button>
-</form>
+<div class="flex justify-center items-center h-screen">
+	<Card.Root class="w-[350px]">
+		<Card.Header>
+			<Card.Title>Login</Card.Title>
+		</Card.Header>
+		<Card.Content>
+			<LoginForm data={data.form} />
+		</Card.Content>
+	</Card.Root>
+</div>

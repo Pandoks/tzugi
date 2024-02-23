@@ -2,18 +2,22 @@ import { dev } from '$app/environment';
 import { db } from '$lib/db';
 import { deviceCookies, timeouts, users } from '$lib/db/schema';
 import { isValidDeviceCookie, lucia } from '$lib/server/auth';
-import { emailSchema, passwordSchema, usernameSchema } from '$lib/validation';
+import { emailSchema, loginFormSchema, passwordSchema, usernameSchema } from '$lib/validation';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import { alphabet, generateRandomString } from 'oslo/crypto';
 import { Argon2id } from 'oslo/password';
 import type { PageServerLoad, PageServerLoadEvent } from './$types';
+import { zod } from 'sveltekit-superforms/adapters';
+import { superValidate } from 'sveltekit-superforms';
 
 export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
 	if (event.locals.user) {
 		return redirect(302, '/');
 	}
-	return {};
+	return {
+		form: await superValidate(zod(loginFormSchema))
+	};
 };
 
 export const actions: Actions = {
