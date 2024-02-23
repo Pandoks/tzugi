@@ -1,7 +1,12 @@
 import { db } from '$lib/db';
 import { timeouts, users } from '$lib/db/schema';
 import { lucia } from '$lib/server/auth';
-import { emailSchema, passwordSchema, usernameSchema } from '$lib/server/validation';
+import {
+	emailSchema,
+	passwordSchema,
+	signupFormSchema,
+	usernameSchema
+} from '$lib/server/validation';
 import { fail, type Actions, redirect } from '@sveltejs/kit';
 import { TimeSpan, generateId } from 'lucia';
 import { Argon2id } from 'oslo/password';
@@ -9,12 +14,16 @@ import { generateEmailVerificationCode, sendVerificationCode } from '$lib/server
 import type { PageServerLoad, PageServerLoadEvent } from './$types';
 import { and, eq } from 'drizzle-orm';
 import { createDate, isWithinExpirationDate } from 'oslo';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
 	if (event.locals.user) {
 		return redirect(302, '/');
 	}
-	return {};
+	return {
+		form: await superValidate(zod(signupFormSchema))
+	};
 };
 
 export const actions: Actions = {
@@ -57,6 +66,7 @@ export const actions: Actions = {
 			return fail(429);
 		}
 
+		// handle signup
 		if (
 			!usernameSchema.safeParse(formData.get('username')).success ||
 			!emailSchema.safeParse(formData.get('email')).success ||
