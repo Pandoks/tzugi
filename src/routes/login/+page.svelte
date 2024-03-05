@@ -17,18 +17,11 @@
 
 <div class="flex justify-center items-center h-screen">
 	<Card.Root class="w-[350px]">
-		<form method="POST" use:enhance>
+		<form method="post" use:enhance>
 			<Card.Header>
 				<Card.Title>Login</Card.Title>
 			</Card.Header>
 			<Card.Content>
-				<Form.Field {form} name="username">
-					<Form.Control let:attrs>
-						<Form.Label>Username</Form.Label>
-						<Input {...attrs} bind:value={$formData.username} />
-					</Form.Control>
-					<Form.FieldErrors />
-				</Form.Field>
 				<Form.Field {form} name="email">
 					<Form.Control let:attrs>
 						<Form.Label>Email</Form.Label>

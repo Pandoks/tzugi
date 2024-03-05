@@ -1,28 +1,13 @@
-import { lucia } from '$lib/server/auth';
-import { fail, type Actions, redirect } from '@sveltejs/kit';
-import type { PageServerLoad, PageServerLoadEvent } from './$types';
+import { fail, redirect } from '@sveltejs/kit';
 
-export const load: PageServerLoad = async (event: PageServerLoadEvent) => {
-	if (!event.locals.user) {
-		return redirect(302, '/auth/login');
-	}
+export const actions = {
+	default: async ({ request, url, locals: { supabase } }) => {
+		const { error } = await supabase.auth.signOut();
 
-	return { username: event.locals.user.username };
-};
-
-export const actions: Actions = {
-	default: async (event) => {
-		if (!event.locals.session) {
-			return fail(401);
+		if (error) {
+			return fail(500, { message: 'Server error. Try again later.', success: false, email });
 		}
 
-		await lucia.invalidateSession(event.locals.session.id);
-		const sessionCookie = lucia.createBlankSessionCookie();
-		event.cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: '.',
-			...sessionCookie.attributes
-		});
-
-		return redirect(302, '/auth/login');
+		return redirect(301, '/login');
 	}
 };
