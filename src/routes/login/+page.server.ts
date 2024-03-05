@@ -1,4 +1,4 @@
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 
 export const actions = {
 	default: async ({ request, url, locals: { supabase } }) => {
@@ -18,9 +18,6 @@ export const actions = {
 			return fail(500, { message: 'Server error. Try again later.', success: false, email });
 		}
 
-		return {
-			message: 'Please check your email for a magic link to log into the website.',
-			success: true
-		};
+		return redirect(301, '/');
 	}
 };
