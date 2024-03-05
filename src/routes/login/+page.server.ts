@@ -1,4 +1,13 @@
 import { fail, redirect } from '@sveltejs/kit';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
+import { loginFormSchema } from '$lib/validation';
+
+export const load = async (event) => {
+	return {
+		form: await superValidate(zod(loginFormSchema))
+	};
+};
 
 export const actions = {
 	default: async ({ request, url, locals: { supabase } }) => {
