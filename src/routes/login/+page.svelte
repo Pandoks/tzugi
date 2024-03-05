@@ -17,7 +17,7 @@
 
 <div class="flex justify-center items-center h-screen">
 	<Card.Root class="w-[350px]">
-		<form method="POST" use:enhance>
+		<form method="post" use:enhance>
 			<Card.Header>
 				<Card.Title>Login</Card.Title>
 			</Card.Header>

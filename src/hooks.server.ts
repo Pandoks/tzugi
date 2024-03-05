@@ -30,6 +30,13 @@ async function supabase({ event, resolve }) {
 }
 
 async function authorization({ event, resolve }) {
+	// testing purposes only
+	// go to login if not signed in
+	const session = await event.locals.getSession();
+	if (!session && !event.url.pathname.startsWith('/login')) {
+		throw redirect(301, '/login');
+	}
+
 	// protect requests to all routes that start with /protected-routes
 	if (event.url.pathname.startsWith('/protected-routes') && event.request.method === 'GET') {
 		const session = await event.locals.getSession();
