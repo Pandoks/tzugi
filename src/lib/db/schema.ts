@@ -4,9 +4,18 @@ export const users = pgTable('users', {
 	id: uuid('id').primaryKey().notNull()
 });
 
+export const plaid = pgTable('plaid', {
+	userId: uuid('user_id')
+		.notNull()
+		.references(() => users.id)
+		.primaryKey(),
+	cursor: text('cursor'),
+	accessToken: text('access_token')
+});
+
 export const transactions = pgTable('transactions', {
 	id: varchar('id').primaryKey().notNull(),
-	user: uuid('user')
+	userId: uuid('user_id')
 		.notNull()
 		.references(() => users.id),
 	timestamp: timestamp('timestamp', { withTimezone: true }),
