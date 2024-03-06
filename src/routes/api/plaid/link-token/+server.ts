@@ -23,5 +23,5 @@ export const GET = async (event) => {
 		country_codes: [CountryCode.Us]
 	};
 	const tokenResponse = await plaid.linkTokenCreate(request);
-	return json({ linkToken: tokenResponse });
+	return json(tokenResponse.data);
 };
