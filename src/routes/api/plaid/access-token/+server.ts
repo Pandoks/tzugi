@@ -8,5 +8,6 @@ export const POST = async (event) => {
 		public_token: body.public_token
 	});
 	ACCESS_TOKEN = tokenResponse.data.access_token;
+	console.log(ACCESS_TOKEN);
 	return json({ success: true });
 };

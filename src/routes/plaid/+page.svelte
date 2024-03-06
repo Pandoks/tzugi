@@ -12,7 +12,7 @@
 	};
 
 	const exchangePublicToken = async (public_token: any) => {
-		await fetch('http://localhost:5173/api/plaid/access-token', {
+		await fetch('/api/plaid/access-token', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -34,10 +34,9 @@
 	});
 
 	const getTransactions = async () => {
-		const res = await fetch('http://localhost:5173/api/plaid/transactions');
+		const res = await fetch('/api/plaid/transactions');
 		const data = await res.json();
 		transactions = data.added;
-		console.log(data);
 	};
 </script>
 
