@@ -20,7 +20,7 @@ if (
 export default defineConfig({
 	schema: './src/lib/db/schema.ts',
 	driver: 'pg',
-	out: './migrations',
+	out: './drizzle',
 	dbCredentials: {
 		user: DB_USERNAME,
 		password: DB_PASSWORD,
