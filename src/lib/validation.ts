@@ -13,7 +13,6 @@ export const emailSchema = z.string().email();
 export const emailCodeSchema = z.string().max(6);
 
 export const signupFormSchema = z.object({
-	username: usernameSchema,
 	email: emailSchema,
 	password: passwordSchema
 });

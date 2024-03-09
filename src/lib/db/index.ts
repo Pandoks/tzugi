@@ -1,7 +1,5 @@
-import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { sessions, users } from './schema';
 import { DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USERNAME } from '$env/static/private';
 
 if (
@@ -20,9 +18,6 @@ const client = postgres({
 	password: DB_PASSWORD,
 	host: DB_HOST,
 	port: parseInt(DB_PORT),
-	database: DB_DATABASE,
-	prepare: false // add SSL when drizzle supports it
+	database: DB_DATABASE
 });
 export const db = drizzle(client);
-
-export const luciaAdapter = new DrizzlePostgreSQLAdapter(db, sessions, users);

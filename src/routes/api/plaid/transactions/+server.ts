@@ -15,7 +15,7 @@ export const GET = async (event) => {
 	let hasMore = true; // transactions are sent paginated
 	while (hasMore) {
 		const request: TransactionsSyncRequest = {
-			access_token: 'access-production-a211a987-49a3-4d19-a3e3-6bbb8dec505d',
+			access_token: ACCESS_TOKEN,
 			cursor: temporaryCursor
 		};
 		const response = await plaid.transactionsSync(request);
