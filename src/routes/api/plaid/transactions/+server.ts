@@ -1,11 +1,11 @@
 import { plaid as plaidClient } from '$lib/plaid';
-import { error, json } from '@sveltejs/kit';
+import { error, json, type RequestHandler } from '@sveltejs/kit';
 import type { RemovedTransaction, Transaction, TransactionsSyncRequest } from 'plaid';
 import { db } from '$lib/db';
 import { plaid, transactions as transactionsTable } from '$lib/db/schema';
 import { desc, eq } from 'drizzle-orm';
 
-export const GET = async (event) => {
+export const GET: RequestHandler = async (event) => {
 	const {
 		data: { user }
 	} = await event.locals.supabase.auth.getUser();

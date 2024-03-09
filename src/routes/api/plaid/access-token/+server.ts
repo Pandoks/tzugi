@@ -1,9 +1,9 @@
 import { db } from '$lib/db';
 import { plaid } from '$lib/db/schema';
 import { plaid as plaidClient } from '$lib/plaid';
-import { json } from '@sveltejs/kit';
+import { json, type RequestHandler } from '@sveltejs/kit';
 
-export const POST = async (event) => {
+export const POST: RequestHandler = async (event) => {
 	const body = await event.request.json();
 	const tokenResponse = await plaidClient.itemPublicTokenExchange({
 		public_token: body.public_token

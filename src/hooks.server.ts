@@ -3,7 +3,7 @@ import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/publi
 import { createSupabaseServerClient } from '@supabase/auth-helpers-sveltekit';
 import { sequence } from '@sveltejs/kit/hooks';
 
-async function supabase({ event, resolve }) {
+const supabase: Handle = async ({ event, resolve }) => {
 	event.locals.supabase = createSupabaseServerClient({
 		supabaseUrl: PUBLIC_SUPABASE_URL,
 		supabaseKey: PUBLIC_SUPABASE_ANON_KEY,
@@ -27,9 +27,9 @@ async function supabase({ event, resolve }) {
 			return name === 'content-range';
 		}
 	});
-}
+};
 
-async function authorization({ event, resolve }) {
+const authorization: Handle = async ({ event, resolve }) => {
 	// testing purposes only
 	// go to login if not signed in
 	// const session = await event.locals.getSession();
@@ -56,6 +56,6 @@ async function authorization({ event, resolve }) {
 	}
 
 	return resolve(event);
-}
+};
 
 export const handle: Handle = sequence(supabase, authorization);

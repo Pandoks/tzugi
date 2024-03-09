@@ -1,9 +1,8 @@
-import { PLAID_PRODUCTS, PLAID_COUNTRY_CODES } from '$env/static/public';
 import { plaid } from '$lib/plaid';
-import { error, json } from '@sveltejs/kit';
+import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { CountryCode, Products } from 'plaid';
 
-export const GET = async (event) => {
+export const GET: RequestHandler = async (event) => {
 	const session = await event.locals.getSession();
 	if (!session) {
 		// the user is not signed in

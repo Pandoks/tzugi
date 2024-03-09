@@ -1,25 +1,25 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { fail, redirect, type Actions, type RequestEvent } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { loginFormSchema } from '$lib/validation';
 
-export const load = async (event) => {
+export const load = async () => {
 	return {
 		form: await superValidate(zod(loginFormSchema))
 	};
 };
 
-export const actions = {
-	default: async ({ request, url, locals: { supabase } }) => {
-		const formData = await request.formData();
+export const actions: Actions = {
+	default: async (event) => {
+		const formData = await event.request.formData();
 		const email = formData.get('email') as string;
 		const password = formData.get('password') as string;
 
-		const { error } = await supabase.auth.signInWithPassword({
+		const { error } = await event.locals.supabase.auth.signInWithPassword({
 			email,
 			password,
 			options: {
-				emailRedirectTo: `${url.origin}/auth/callback`
+				emailRedirectTo: `${event.url.origin}/auth/callback`
 			}
 		});
 
