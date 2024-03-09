@@ -3,13 +3,16 @@ import { error, json, type RequestHandler } from '@sveltejs/kit';
 import type { RemovedTransaction, Transaction, TransactionsSyncRequest } from 'plaid';
 import { db } from '$lib/db';
 import { plaid, transactions as transactionsTable } from '$lib/db/schema';
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 
 export const GET: RequestHandler = async (event) => {
 	const {
 		data: { user }
 	} = await event.locals.supabase.auth.getUser();
-	const [{ cursor, accessToken }] = await db.select().from(plaid).where(eq(plaid.userId, user.id));
+	const [{ cursor, accessToken, institutionId }] = await db
+		.select()
+		.from(plaid)
+		.where(eq(plaid.userId, user.id));
 	if (!accessToken) return error(404);
 
 	let temporaryCursor = cursor;
@@ -38,13 +41,17 @@ export const GET: RequestHandler = async (event) => {
 	}
 
 	// Update databases
-	await db.update(plaid).set({ cursor: temporaryCursor }).where(eq(plaid.userId, user.id));
+	await db
+		.update(plaid)
+		.set({ cursor: temporaryCursor })
+		.where(and(eq(plaid.userId, user.id), eq(plaid.institutionId, institutionId)));
 	for (const addedTransaction of added) {
 		await db
 			.insert(transactionsTable)
 			.values({
 				id: addedTransaction.transaction_id,
 				userId: user.id,
+				institutionId: institutionId,
 				timestamp: new Date(addedTransaction.authorized_date!),
 				data: addedTransaction,
 				imagePath: ''
