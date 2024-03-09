@@ -36,7 +36,7 @@
 	const getTransactions = async () => {
 		const res = await fetch('/api/plaid/transactions');
 		const data = await res.json();
-		transactions = data.added;
+		transactions = data.transactions;
 	};
 </script>
 

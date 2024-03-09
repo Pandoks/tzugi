@@ -2,8 +2,8 @@ import { plaid as plaidClient, updateTransactionDatabase } from '$lib/plaid';
 import { error, json } from '@sveltejs/kit';
 import type { RemovedTransaction, Transaction, TransactionsSyncRequest } from 'plaid';
 import { db } from '$lib/db';
-import { plaid } from '$lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { plaid, transactions as transactionsTable } from '$lib/db/schema';
+import { desc, eq } from 'drizzle-orm';
 
 export const GET = async (event) => {
 	const {
@@ -43,9 +43,13 @@ export const GET = async (event) => {
 		removed: removed,
 		userId: user.id
 	});
-	added = [...added].sort((first, second) => {
-		return Number(second.date > first.date) - Number(second.date < first.date);
-	});
 
-	return json({ added: added });
+	const transactionsQuery = await db
+		.select()
+		.from(transactionsTable)
+		.where(eq(transactionsTable.userId, user.id))
+		.orderBy(desc(transactionsTable.timestamp));
+	const transactions = transactionsQuery.map((transaction) => transaction.data);
+
+	return json({ transactions: transactions });
 };
