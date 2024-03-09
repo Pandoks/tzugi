@@ -11,13 +11,13 @@
 		return data.link_token;
 	};
 
-	const exchangePublicToken = async (public_token: any) => {
+	const exchangePublicToken = async (public_token: string, metadata: any) => {
 		await fetch('/api/plaid/access-token', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ public_token: public_token })
+			body: JSON.stringify({ public_token: public_token, metadata: metadata })
 		});
 	};
 

@@ -4,15 +4,24 @@ import { plaid as plaidClient } from '$lib/plaid';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async (event) => {
-	const body = await event.request.json();
+	const { public_token, metadata } = await event.request.json();
 	const tokenResponse = await plaidClient.itemPublicTokenExchange({
-		public_token: body.public_token
+		public_token: public_token
 	});
+
 	const {
 		data: { user }
 	} = await event.locals.supabase.auth.getUser();
+
 	await db
 		.insert(plaid)
-		.values({ userId: user.id, cursor: '', accessToken: tokenResponse.data.access_token });
+		.values({
+			userId: user.id,
+			cursor: '',
+			accessToken: tokenResponse.data.access_token,
+			institutionId: metadata.institution.institution_id,
+			accounts: metadata.accounts
+		})
+		.onConflictDoNothing();
 	return json({ success: true });
 };
