@@ -14,11 +14,11 @@ export const plaid = pgTable('plaid', {
 });
 
 export const transactions = pgTable('transactions', {
-	id: uuid('id').primaryKey().notNull().defaultRandom(),
+	id: varchar('id').primaryKey().notNull(),
 	userId: uuid('user_id')
 		.notNull()
 		.references(() => users.id),
-	timestamp: timestamp('timestamp', { withTimezone: true }),
+	timestamp: timestamp('timestamp', { mode: 'date', withTimezone: true }),
 	data: json('data').notNull(),
 	imagePath: text('image_path').notNull().default('')
 });
