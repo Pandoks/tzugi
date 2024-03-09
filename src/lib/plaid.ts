@@ -21,7 +21,7 @@ const configuration = new Configuration({
 });
 export const plaid = new PlaidApi(configuration);
 
-export const updatePlaidDatabase = async ({
+export const updateTransactionDatabase = async ({
 	added,
 	modified,
 	removed,

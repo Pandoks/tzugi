@@ -1,4 +1,4 @@
-import { plaid as plaidClient } from '$lib/plaid';
+import { plaid as plaidClient, updateTransactionDatabase } from '$lib/plaid';
 import { error, json } from '@sveltejs/kit';
 import type { RemovedTransaction, Transaction, TransactionsSyncRequest } from 'plaid';
 import { db } from '$lib/db';
@@ -37,6 +37,12 @@ export const GET = async (event) => {
 		temporaryCursor = data.next_cursor;
 	}
 	await db.update(plaid).set({ cursor: temporaryCursor }).where(eq(plaid.userId, user.id));
+	await updateTransactionDatabase({
+		added: added,
+		modified: modified,
+		removed: removed,
+		userId: user.id
+	});
 	added = [...added].sort((first, second) => {
 		return Number(second.date > first.date) - Number(second.date < first.date);
 	});
