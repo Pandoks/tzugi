@@ -1,5 +1,14 @@
 import { relations } from 'drizzle-orm';
-import { json, pgTable, primaryKey, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import {
+	foreignKey,
+	json,
+	pgTable,
+	primaryKey,
+	text,
+	timestamp,
+	uuid,
+	varchar
+} from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
 	id: uuid('id').primaryKey().notNull()
@@ -26,18 +35,25 @@ export const plaid = pgTable(
 	}
 );
 
-export const transactions = pgTable('transactions', {
-	id: varchar('id').primaryKey().notNull(),
-	userId: uuid('user_id')
-		.notNull()
-		.references(() => users.id),
-	institutionId: text('institution_id')
-		.notNull()
-		.references(() => plaid.institutionId),
-	timestamp: timestamp('timestamp', { mode: 'date', withTimezone: true }),
-	data: json('data').notNull(),
-	imagePath: text('image_path').notNull().default('')
-});
+export const transactions = pgTable(
+	'transactions',
+	{
+		id: varchar('id').primaryKey().notNull(),
+		userId: uuid('user_id').notNull(),
+		institutionId: text('institution_id').notNull(),
+		timestamp: timestamp('timestamp', { mode: 'date', withTimezone: true }),
+		data: json('data').notNull(),
+		imagePath: text('image_path').notNull().default('')
+	},
+	(table) => {
+		return {
+			plaidReference: foreignKey({
+				columns: [table.userId, table.institutionId],
+				foreignColumns: [plaid.userId, plaid.institutionId]
+			})
+		};
+	}
+);
 
 export const transactionsRelations = relations(transactions, ({ one }) => ({
 	user: one(users, {
