@@ -29,33 +29,31 @@ const supabase: Handle = async ({ event, resolve }) => {
 	});
 };
 
-const authorization: Handle = async ({ event, resolve }) => {
-	// testing purposes only
-	// go to login if not signed in
-	// const session = await event.locals.getSession();
-	// if (!session && !event.url.pathname.startsWith('/signup')) {
-	// 	throw redirect(301, '/signup');
-	// }
+// const authorization: Handle = async ({ event, resolve }) => {
+// testing purposes only
+// go to login if not signed in
+// const session = await event.locals.getSession();
+// if (!session && !event.url.pathname.startsWith('/signup')) {
+// 	throw redirect(301, '/signup');
+// }
+// protect requests to all routes that start with /protected-routes
+// if (event.url.pathname.startsWith('/protected-routes') && event.request.method === 'GET') {
+// 	const session = await event.locals.getSession();
+// 	if (!session) {
+// 		// the user is not signed in
+// 		throw redirect(303, '/');
+// 	}
+// }
+// protect POST requests to all routes that start with /protected-posts
+// if (event.url.pathname.startsWith('/protected-posts') && event.request.method === 'POST') {
+// 	const session = await event.locals.getSession();
+// 	if (!session) {
+// 		// the user is not signed in
+// 		throw error(303, '/');
+// 	}
+// }
+//
+// return resolve(event);
+// };
 
-	// protect requests to all routes that start with /protected-routes
-	if (event.url.pathname.startsWith('/protected-routes') && event.request.method === 'GET') {
-		const session = await event.locals.getSession();
-		if (!session) {
-			// the user is not signed in
-			throw redirect(303, '/');
-		}
-	}
-
-	// protect POST requests to all routes that start with /protected-posts
-	if (event.url.pathname.startsWith('/protected-posts') && event.request.method === 'POST') {
-		const session = await event.locals.getSession();
-		if (!session) {
-			// the user is not signed in
-			throw error(303, '/');
-		}
-	}
-
-	return resolve(event);
-};
-
-export const handle: Handle = sequence(supabase, authorization);
+export const handle: Handle = sequence(supabase);

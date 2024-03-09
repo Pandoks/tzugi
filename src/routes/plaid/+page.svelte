@@ -23,8 +23,7 @@
 
 	const createLogin = async () => {
 		const token = await getLinkToken();
-		const onSuccess = exchangePublicToken;
-		const config = { token: token, onSuccess: onSuccess };
+		const config = { token: token, onSuccess: exchangePublicToken };
 		return Plaid!.create(config);
 	};
 
