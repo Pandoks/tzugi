@@ -1,12 +1,18 @@
-import { plaid } from '$lib/plaid';
-import { json } from '@sveltejs/kit';
+import { plaid as plaidClient } from '$lib/plaid';
+import { error, json } from '@sveltejs/kit';
 import type { RemovedTransaction, Transaction, TransactionsSyncRequest } from 'plaid';
-import { TEST_ACCESS_TOKEN } from '$env/static/private';
+import { db } from '$lib/db';
+import { plaid } from '$lib/db/schema';
+import { eq } from 'drizzle-orm';
 
-let CURSOR = '';
 export const GET = async (event) => {
-	let databaseCursor = CURSOR;
-	let temporaryCursor = databaseCursor;
+	const {
+		data: { user }
+	} = await event.locals.supabase.auth.getUser();
+	const [{ cursor, accessToken }] = await db.select().from(plaid).where(eq(plaid.userId, user.id));
+	if (!accessToken) return error(404);
+
+	let temporaryCursor = cursor;
 
 	// new transaction updates since cursor
 	let added: Array<Transaction> = [];
@@ -16,10 +22,10 @@ export const GET = async (event) => {
 	let hasMore = true; // transactions are sent paginated
 	while (hasMore) {
 		const request: TransactionsSyncRequest = {
-			access_token: TEST_ACCESS_TOKEN,
-			cursor: temporaryCursor
+			access_token: accessToken,
+			cursor: temporaryCursor!
 		};
-		const response = await plaid.transactionsSync(request);
+		const response = await plaidClient.transactionsSync(request);
 		const data = response.data;
 
 		added = added.concat(data.added);
@@ -28,9 +34,9 @@ export const GET = async (event) => {
 
 		hasMore = data.has_more;
 
-		console.log(temporaryCursor);
 		temporaryCursor = data.next_cursor;
 	}
+	await db.update(plaid).set({ cursor: temporaryCursor }).where(eq(plaid.userId, user.id));
 	added = [...added].sort((first, second) => {
 		return Number(second.date > first.date) - Number(second.date < first.date);
 	});

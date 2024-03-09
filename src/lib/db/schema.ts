@@ -9,7 +9,7 @@ export const plaid = pgTable('plaid', {
 		.notNull()
 		.references(() => users.id)
 		.primaryKey(),
-	cursor: text('cursor'),
+	cursor: text('cursor').default(''),
 	accessToken: text('access_token')
 });
 
@@ -19,6 +19,6 @@ export const transactions = pgTable('transactions', {
 		.notNull()
 		.references(() => users.id),
 	timestamp: timestamp('timestamp', { withTimezone: true }),
-	data: json('data'),
-	imagePath: text('image_path')
+	data: json('data').notNull(),
+	imagePath: text('image_path').notNull().default('')
 });
