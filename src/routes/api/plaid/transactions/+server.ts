@@ -1,4 +1,4 @@
-import { plaid as plaidClient, updateTransactionDatabase } from '$lib/plaid';
+import { plaid as plaidClient } from '$lib/plaid';
 import { error, json } from '@sveltejs/kit';
 import type { RemovedTransaction, Transaction, TransactionsSyncRequest } from 'plaid';
 import { db } from '$lib/db';
@@ -36,13 +36,34 @@ export const GET = async (event) => {
 
 		temporaryCursor = data.next_cursor;
 	}
+
+	// Update databases
 	await db.update(plaid).set({ cursor: temporaryCursor }).where(eq(plaid.userId, user.id));
-	await updateTransactionDatabase({
-		added: added,
-		modified: modified,
-		removed: removed,
-		userId: user.id
-	});
+	for (const addedTransaction of added) {
+		await db
+			.insert(transactionsTable)
+			.values({
+				id: addedTransaction.transaction_id,
+				userId: user.id,
+				timestamp: new Date(addedTransaction.authorized_date!),
+				data: addedTransaction,
+				imagePath: ''
+			})
+			.onConflictDoNothing();
+	}
+	for (const modifiedTransaction of modified) {
+		await db
+			.update(transactionsTable)
+			.set({
+				data: modifiedTransaction
+			})
+			.where(eq(transactionsTable.id, modifiedTransaction.transaction_id));
+	}
+	for (const removedTransaction of removed) {
+		await db
+			.delete(transactionsTable)
+			.where(eq(transactionsTable.id, removedTransaction.transaction_id!));
+	}
 
 	const transactionsQuery = await db
 		.select()
