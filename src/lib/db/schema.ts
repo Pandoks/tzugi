@@ -14,7 +14,7 @@ export const plaid = pgTable('plaid', {
 });
 
 export const transactions = pgTable('transactions', {
-	id: varchar('id').primaryKey().notNull(),
+	id: uuid('id').primaryKey().notNull().defaultRandom(),
 	userId: uuid('user_id')
 		.notNull()
 		.references(() => users.id),
