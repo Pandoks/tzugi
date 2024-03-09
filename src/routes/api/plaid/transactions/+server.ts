@@ -1,6 +1,7 @@
 import { plaid } from '$lib/plaid';
 import { json } from '@sveltejs/kit';
 import type { RemovedTransaction, Transaction, TransactionsSyncRequest } from 'plaid';
+import { TEST_ACCESS_TOKEN } from '$env/static/private';
 
 let CURSOR = '';
 export const GET = async (event) => {
@@ -15,7 +16,7 @@ export const GET = async (event) => {
 	let hasMore = true; // transactions are sent paginated
 	while (hasMore) {
 		const request: TransactionsSyncRequest = {
-			access_token: ACCESS_TOKEN,
+			access_token: TEST_ACCESS_TOKEN,
 			cursor: temporaryCursor
 		};
 		const response = await plaid.transactionsSync(request);

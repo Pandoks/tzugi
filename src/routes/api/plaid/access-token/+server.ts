@@ -1,13 +1,18 @@
-import { plaid } from '$lib/plaid';
+import { db } from '$lib/db';
+import { plaid } from '$lib/db/schema';
+import { plaid as plaidClient } from '$lib/plaid';
 import { json } from '@sveltejs/kit';
 
-let ACCESS_TOKEN = ''; // Store in db after testing
 export const POST = async (event) => {
 	const body = await event.request.json();
-	const tokenResponse = await plaid.itemPublicTokenExchange({
+	const tokenResponse = await plaidClient.itemPublicTokenExchange({
 		public_token: body.public_token
 	});
-	ACCESS_TOKEN = tokenResponse.data.access_token;
-	console.log(ACCESS_TOKEN);
+	const {
+		data: { user }
+	} = await event.locals.supabase.auth.getUser();
+	await db
+		.insert(plaid)
+		.values({ userId: user.id, cursor: '', accessToken: tokenResponse.data.access_token });
 	return json({ success: true });
 };
