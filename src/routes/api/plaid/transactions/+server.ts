@@ -24,20 +24,35 @@ export const GET: RequestHandler = async (event) => {
 
 	let hasMore = true; // transactions are sent paginated
 	while (hasMore) {
-		const request: TransactionsSyncRequest = {
-			access_token: accessToken,
-			cursor: temporaryCursor!
-		};
-		const response = await plaidClient.transactionsSync(request);
-		const data = response.data;
+		try {
+			const request: TransactionsSyncRequest = {
+				access_token: accessToken,
+				cursor: temporaryCursor!
+			};
+			const response = await plaidClient.transactionsSync(request);
+			const data = response.data;
 
-		added = added.concat(data.added);
-		modified = modified.concat(data.modified);
-		removed = removed.concat(data.removed);
+			added = added.concat(data.added);
+			modified = modified.concat(data.modified);
+			removed = removed.concat(data.removed);
 
-		hasMore = data.has_more;
+			hasMore = data.has_more;
 
-		temporaryCursor = data.next_cursor;
+			temporaryCursor = data.next_cursor;
+		} catch (error: any) {
+			if (
+				error.response &&
+				error.response.data &&
+				error.response.data.error_code === 'ITEM_LOGIN_REQUIRED'
+			) {
+				return json(
+					{ error: 'ITEM_LOGIN_REQUIRED', message: error.response.data.error_message },
+					{ status: 400 }
+				);
+			} else {
+				return error(500, error.message || 'An unexpected error occurred');
+			}
+		}
 	}
 
 	// Update databases
@@ -45,6 +60,7 @@ export const GET: RequestHandler = async (event) => {
 		.update(plaid)
 		.set({ cursor: temporaryCursor })
 		.where(and(eq(plaid.userId, user.id), eq(plaid.institutionId, institutionId)));
+
 	for (const addedTransaction of added) {
 		await db
 			.insert(transactionsTable)
@@ -78,7 +94,8 @@ export const GET: RequestHandler = async (event) => {
 		.where(eq(transactionsTable.userId, user.id))
 		.orderBy(desc(transactionsTable.timestamp));
 	const transactions = transactionsQuery.map((transaction) => transaction.data);
-	console.log(transactions);
+
+	console.log('Transactions:', transactions);
 
 	return json({ transactions: transactions });
 };
