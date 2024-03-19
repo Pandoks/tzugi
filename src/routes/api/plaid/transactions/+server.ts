@@ -39,18 +39,20 @@ export const GET: RequestHandler = async (event) => {
 			hasMore = data.has_more;
 
 			temporaryCursor = data.next_cursor;
-		} catch (error: any) {
+		} catch (requestError: any) {
 			if (
-				error.response &&
-				error.response.data &&
-				error.response.data.error_code === 'ITEM_LOGIN_REQUIRED'
+				requestError.response &&
+				requestError.response.data &&
+				requestError.response.data.error_code === 'ITEM_LOGIN_REQUIRED'
 			) {
+				// Need to go through Plaid link again for that specific bank account
+				// TODO: Make frontend intercept this
 				return json(
-					{ error: 'ITEM_LOGIN_REQUIRED', message: error.response.data.error_message },
+					{ error: 'ITEM_LOGIN_REQUIRED', message: requestError.response.data.error_message },
 					{ status: 400 }
 				);
 			} else {
-				return error(500, error.message || 'An unexpected error occurred');
+				return error(500);
 			}
 		}
 	}
@@ -94,8 +96,6 @@ export const GET: RequestHandler = async (event) => {
 		.where(eq(transactionsTable.userId, user.id))
 		.orderBy(desc(transactionsTable.timestamp));
 	const transactions = transactionsQuery.map((transaction) => transaction.data);
-
-	console.log('Transactions:', transactions);
 
 	return json({ transactions: transactions });
 };

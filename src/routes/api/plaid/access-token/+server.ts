@@ -22,6 +22,10 @@ export const POST: RequestHandler = async (event) => {
 			institutionId: metadata.institution.institution_id,
 			accounts: metadata.accounts
 		})
-		.onConflictDoNothing();
+		.onConflictDoUpdate({
+			target: [plaid.userId, plaid.institutionId],
+			set: { cursor: '', accessToken: tokenResponse.data.access_token, accounts: metadata.accounts }
+		});
+
 	return json({ success: true });
 };
