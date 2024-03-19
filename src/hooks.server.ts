@@ -1,13 +1,25 @@
 import { type Handle, redirect, error } from '@sveltejs/kit';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-import { createSupabaseServerClient } from '@supabase/auth-helpers-sveltekit';
 import { sequence } from '@sveltejs/kit/hooks';
+import { createServerClient } from '@supabase/ssr';
 
 const supabase: Handle = async ({ event, resolve }) => {
-	event.locals.supabase = createSupabaseServerClient({
-		supabaseUrl: PUBLIC_SUPABASE_URL,
-		supabaseKey: PUBLIC_SUPABASE_ANON_KEY,
-		event
+	event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+		cookies: {
+			get: (key) => event.cookies.get(key),
+			/**
+			 * Note: You have to add the `path` variable to the
+			 * set and remove method due to sveltekit's cookie API
+			 * requiring this to be set, setting the path to an empty string
+			 * will replicate previous/standard behaviour (https://kit.svelte.dev/docs/types#public-types-cookies)
+			 */
+			set: (key, value, options) => {
+				event.cookies.set(key, value, { ...options, path: '/' });
+			},
+			remove: (key, options) => {
+				event.cookies.delete(key, { ...options, path: '/' });
+			}
+		}
 	});
 
 	/**
@@ -30,12 +42,7 @@ const supabase: Handle = async ({ event, resolve }) => {
 };
 
 const authorization: Handle = async ({ event, resolve }) => {
-	// testing purposes only
-	// go to login if not signed in
-	const session = await event.locals.getSession();
-	if (!session && !event.url.pathname.startsWith('/signup')) {
-		throw redirect(301, '/signup');
-	}
+	// testing purposes only go to login if not signed in const session = await event.locals.getSession(); if (!session && !event.url.pathname.startsWith('/signup')) { throw redirect(301, '/signup'); }
 	// protect requests to all routes that start with /protected-routes
 	if (event.url.pathname.startsWith('/protected-routes') && event.request.method === 'GET') {
 		const session = await event.locals.getSession();
@@ -56,4 +63,4 @@ const authorization: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-export const handle: Handle = sequence(supabase, authorization);
+export const handle: Handle = sequence(supabase);

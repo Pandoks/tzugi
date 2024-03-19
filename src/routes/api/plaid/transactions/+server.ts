@@ -78,6 +78,7 @@ export const GET: RequestHandler = async (event) => {
 		.where(eq(transactionsTable.userId, user.id))
 		.orderBy(desc(transactionsTable.timestamp));
 	const transactions = transactionsQuery.map((transaction) => transaction.data);
+	console.log(transactions);
 
 	return json({ transactions: transactions });
 };

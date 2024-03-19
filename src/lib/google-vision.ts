@@ -14,7 +14,9 @@ export const detectWordsFromImage = async ({
 	cloudClient: SupabaseClient;
 }) => {
 	const { data, error } = await cloudClient.storage.from(storageBucket).download(storageFilePath);
-	const [result] = await googleVisionClient.textDetection('5d02c94582f07a3b07e60647723eadc3.jpg');
+	const [result] = await googleVisionClient.textDetection(
+		'examples/5d02c94582f07a3b07e60647723eadc3.jpg'
+	);
 	console.log(result);
 	const detections = result.textAnnotations;
 	console.log(detections);
