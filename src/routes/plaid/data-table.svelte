@@ -1,13 +1,15 @@
 <script lang="ts">
 	import type { Transaction } from 'plaid';
-	import { readable } from 'svelte/store';
+	import { writable } from 'svelte/store';
 	import { createRender, createTable, Render, Subscribe } from 'svelte-headless-table';
 	import * as Table from '$lib/components/ui/table';
 	import DataTableActions from './data-table-actions.svelte';
 
 	export let transactions: Transaction[] = [];
+	const transactionsStore = writable(transactions);
+	$: $transactionsStore = transactions; // when transactions changes, update the store
 
-	const table = createTable(readable(transactions));
+	const table = createTable(transactionsStore);
 
 	const columns = table.createColumns([
 		table.column({
