@@ -28,9 +28,13 @@ const supabase: Handle = async ({ event, resolve }) => {
 	 * you just call this `await getSession()`
 	 */
 	event.locals.getSession = async () => {
-		const {
+		const { data: getUserData, error: error } = await event.locals.supabase.auth.getUser();
+		let {
 			data: { session }
 		} = await event.locals.supabase.auth.getSession();
+
+		if (getUserData.user === null) session = null;
+
 		return session;
 	};
 
