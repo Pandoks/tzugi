@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { Transaction } from 'plaid';
 	import { readable } from 'svelte/store';
-	import { createTable, Render, Subscribe } from 'svelte-headless-table';
+	import { createRender, createTable, Render, Subscribe } from 'svelte-headless-table';
 	import * as Table from '$lib/components/ui/table';
+	import DataTableActions from './data-table-actions.svelte';
 
 	export let transactions: Transaction[] = [];
 
@@ -23,7 +24,10 @@
 		}),
 		table.column({
 			accessor: ({ transaction_id }) => transaction_id,
-			header: ''
+			header: '',
+			cell: ({ value }) => {
+				return createRender(DataTableActions, { id: value });
+			}
 		})
 	]);
 
