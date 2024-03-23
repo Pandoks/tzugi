@@ -8,8 +8,7 @@ const supabaseClient = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KE
 test('Download file from supabase', async () => {
 	const { data, error } = await detectWordsFromImage({
 		storageFilePath: 'test/test.jpg',
-		storageBucket: 'files',
+		storageBucket: 'receipts',
 		cloudClient: supabaseClient
 	});
-	console.log(data, error);
 });
