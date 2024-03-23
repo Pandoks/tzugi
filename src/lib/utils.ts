@@ -98,7 +98,6 @@ export const paginationTextGenerator = ({
 		pages.push(pageCount.toString());
 	}
 
-	console.log(pages);
 	return pages;
 };
 
