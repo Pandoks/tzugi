@@ -71,21 +71,22 @@
 			body: JSON.stringify({
 				transactionId: currentSelectedTransaction ? currentSelectedTransaction.transaction_id : ''
 			})
-		}).then((response) => response.json().then((obj) => (currentImagePath = obj.imagePath)));
+		})
+			.then((response) => response.json().then((obj) => (currentImagePath = obj.imagePath)))
+			.then(() =>
+				supabase.storage
+					.from('receipts')
+					.download(currentImagePath.substring(currentImagePath.indexOf('/') + 1))
+					.then((response) => {
+						if (response.error) imageURL = '';
+						if (response.data) {
+							imageURL = URL.createObjectURL(response.data);
+						}
+					})
+					.catch((err) => console.error('Download error:', err.message))
+			);
 	}
 
-	$: if (initialized) {
-		supabase.storage
-			.from('receipts')
-			.download(currentImagePath.substring(currentImagePath.indexOf('/') + 1))
-			.then((response) => {
-				if (response.error) throw response.error;
-				if (response.data) {
-					imageURL = URL.createObjectURL(response.data);
-				}
-			})
-			.catch((err) => console.error('Download error:', err.message));
-	}
 	$: if (initialized) {
 		imageURLs.push(imageURL);
 	}
