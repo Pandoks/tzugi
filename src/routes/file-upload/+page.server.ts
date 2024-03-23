@@ -4,7 +4,7 @@ import {
 	receiptTransactionSimilarity,
 	type ReceiptFeatures
 } from '$lib/server/receipt-feature-extraction';
-import { error, fail, type Actions } from '@sveltejs/kit';
+import { error, fail, json, type Actions } from '@sveltejs/kit';
 import { transactions } from '$lib/db/schema';
 import { and, desc, eq } from 'drizzle-orm';
 
@@ -34,7 +34,7 @@ export const actions: Actions = {
 		const transactionsQuery = await db
 			.select()
 			.from(transactions)
-			.where(and(eq(transactions.userId, user.id), eq(transactions.imagePath, '')))
+			.where(eq(transactions.userId, user.id))
 			.orderBy(desc(transactions.timestamp));
 
 		let similarityList = [];
@@ -67,16 +67,20 @@ export const actions: Actions = {
 			.where(eq(transactions.id, mostSimilar.transaction.id))
 			.limit(1);
 		if (transaction.imagePath !== '') {
-			return error(500, 'Transaction already has a receipt image');
+			return json({
+				success: false,
+				message: 'Receipt already exists for its matched transaction',
+				transactionId: mostSimilar.transaction.id
+			});
 		}
 		// TODO: catch by front end and hit api endpoint to replace image if user answers yes replace
 		// API endpoint to upload and replace transaction
 		// Have spinner where it shows user that the image is being matched
 
-		// const THRESHOLD_SUM = 24;
-		// if (mostSimilar.weightedSum > THRESHOLD_SUM) {
-		// 	return error(500, 'No transaction match found');
-		// }
+		const THRESHOLD_SUM = 24;
+		if (mostSimilar.weightedSum > THRESHOLD_SUM) {
+			return error(500, 'No transaction match found');
+		}
 
 		const filePath = `${user!.id}/${new Date().getTime()}.${fileUpload.name.split('.').pop()}`;
 		const imageBuffer = Buffer.from(await fileUpload.arrayBuffer());
