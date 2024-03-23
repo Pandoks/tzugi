@@ -2,11 +2,12 @@
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Button } from '$lib/components/ui/button';
+	import { getContext } from 'svelte';
 
 	export let transactionId: string;
-	export let imageToggle: boolean = false;
 	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
 	let file: FileList;
+	const receiptStatus = getContext('showReceipt');
 
 	const handleUpload = async () => {
 		if (file && file.length > 0) {

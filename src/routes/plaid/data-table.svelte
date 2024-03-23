@@ -7,10 +7,13 @@
 	import { addPagination } from 'svelte-headless-table/plugins';
 	import { Button } from '$lib/components/ui/button';
 	import { paginationTextGenerator } from '$lib/utils';
+	import { setContext } from 'svelte';
 
 	export let transactions: Transaction[] = [];
 	const transactionsStore = writable(transactions);
 	$: $transactionsStore = transactions; // when transactions changes, update the store
+	const showReceipt = writable({ imagePath: '', show: false });
+	setContext('showReceipt', showReceipt);
 
 	const table = createTable(transactionsStore, {
 		page: addPagination({
