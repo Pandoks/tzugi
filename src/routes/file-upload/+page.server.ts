@@ -4,9 +4,9 @@ import {
 	receiptTransactionSimilarity,
 	type ReceiptFeatures
 } from '$lib/server/receipt-feature-extraction';
-import { error, fail, json, type Actions } from '@sveltejs/kit';
+import { error, json, type Actions } from '@sveltejs/kit';
 import { transactions } from '$lib/db/schema';
-import { and, desc, eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 
 export const actions: Actions = {
 	default: async (event) => {
@@ -16,8 +16,7 @@ export const actions: Actions = {
 		const formData = Object.fromEntries(await event.request.formData());
 
 		if (!(formData.fileUpload as File).name || (formData.fileUpload as File).name === 'undefined') {
-			return fail(400, {
-				error: true,
+			return error(400, {
 				message: 'You must provide a file to upload'
 			});
 		}

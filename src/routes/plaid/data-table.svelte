@@ -36,7 +36,7 @@
 			accessor: ({ transaction_id }) => transaction_id,
 			header: '',
 			cell: ({ value }) => {
-				return createRender(DataTableActions, { id: value });
+				return createRender(DataTableActions, { transactionId: value });
 			}
 		})
 	]);

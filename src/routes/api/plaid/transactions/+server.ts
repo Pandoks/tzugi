@@ -47,6 +47,7 @@ export const GET: RequestHandler = async (event) => {
 			) {
 				// Need to go through Plaid link again for that specific bank account
 				// TODO: Make frontend intercept this
+				// Fix storing dates in database (Check the timezones)
 				return json(
 					{ error: 'ITEM_LOGIN_REQUIRED', message: requestError.response.data.error_message },
 					{ status: 400 }
