@@ -83,7 +83,6 @@ describe('Pagination text generation', () => {
 	});
 
 	test('Pagination of size 20', () => {
-		console.log(paginationTextGenerator({ pageIndex: 0, pageCount: 20 }));
 		expect(paginationTextGenerator({ pageIndex: 0, pageCount: 20 })).toStrictEqual([
 			'current',
 			'2',

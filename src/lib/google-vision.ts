@@ -17,10 +17,10 @@ export const detectWordsFromImage = async ({
 	const [result] = await googleVisionClient.textDetection(
 		'examples/5d02c94582f07a3b07e60647723eadc3.jpg'
 	);
-	console.log(result);
 	const detections = result.textAnnotations;
-	console.log(detections);
-	console.log('Text:');
-	detections!.forEach((text) => console.log(text));
-	return { data, error };
+	if (!detections) {
+		return { data: null, error: 'No text detected' };
+	}
+	const text = detections[0].description;
+	return { data: text, error };
 };
