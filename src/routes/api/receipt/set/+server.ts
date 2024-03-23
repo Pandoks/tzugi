@@ -41,7 +41,7 @@ export const POST: RequestHandler = async (event) => {
 	if (transaction.imagePath !== '') {
 		event.locals.supabase.storage
 			.from('receipts')
-			.remove([transaction.imagePath.substring(filePath.indexOf('/') + 1)]);
+			.remove([transaction.imagePath.substring(transaction.imagePath.indexOf('/') + 1)]);
 	}
 
 	await db

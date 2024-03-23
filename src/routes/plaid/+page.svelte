@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { onMount } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 	import type { Transaction } from 'plaid';
 	import DataTable from './data-table.svelte';
 
 	let Plaid: any;
 	let plaid_login: any;
 	let transactions: Transaction[] = [];
+	export let data;
 
 	onMount(async () => {
 		Plaid = window.Plaid;
@@ -49,5 +50,5 @@
 <Button on:click={plaid_login.open()}>Link Plaid Account</Button>
 <Button on:click={getTransactions}>Get Transactions</Button>
 <div class="container mx-auto py-10">
-	<DataTable {transactions} />
+	<DataTable {transactions} supabase={data.supabase} />
 </div>

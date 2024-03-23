@@ -7,13 +7,18 @@
 	import { addPagination } from 'svelte-headless-table/plugins';
 	import { Button } from '$lib/components/ui/button';
 	import { paginationTextGenerator } from '$lib/utils';
-	import { setContext } from 'svelte';
+	import { onDestroy, setContext } from 'svelte';
+	import type { SupabaseClient } from '@supabase/supabase-js';
+	import { AspectRatio } from '$lib/components/ui/aspect-ratio';
 
 	export let transactions: Transaction[] = [];
+	export let supabase: SupabaseClient;
 	const transactionsStore = writable(transactions);
 	$: $transactionsStore = transactions; // when transactions changes, update the store
 	const showReceipt = writable({ imagePath: '', show: false });
 	setContext('showReceipt', showReceipt);
+	let imageURLs: string[] = [];
+	let imageURL: string;
 
 	const table = createTable(transactionsStore, {
 		page: addPagination({
@@ -52,43 +57,84 @@
 		pageIndex: $pageIndex,
 		pageCount: $pageCount
 	});
+
+	$: if ($showReceipt.show) {
+		downloadReceipt();
+	}
+
+	const downloadReceipt = async () => {
+		try {
+			const { data, error } = await supabase.storage
+				.from('receipts')
+				.download($showReceipt.imagePath.substring($showReceipt.imagePath.indexOf('/') + 1));
+
+			if (error) throw error;
+
+			if (data) {
+				imageURL = URL.createObjectURL(data);
+				imageURLs.push(imageURL);
+			}
+		} catch (err: any) {
+			console.error('Download error:', err.message);
+		}
+	};
+
+	onDestroy(() => {
+		for (let index = 0; index < imageURLs.length; index++) {
+			URL.revokeObjectURL(imageURLs[index]);
+		}
+	});
 </script>
 
 <div>
 	<div class="rounded-md border">
-		<Table.Root {...$tableAttrs}>
-			<Table.Header>
-				{#each $headerRows as headerRow}
-					<Subscribe rowAttrs={headerRow.attrs()}>
-						<Table.Row>
-							{#each headerRow.cells as cell (cell.id)}
-								<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()}>
-									<Table.Head {...attrs}>
-										<Render of={cell.render()} />
-									</Table.Head>
-								</Subscribe>
-							{/each}
-						</Table.Row>
-					</Subscribe>
-				{/each}
-			</Table.Header>
-			<Table.Body {...$tableBodyAttrs}>
-				{#each $pageRows as row (row.id)}
-					<Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-						<Table.Row {...rowAttrs}>
-							{#each row.cells as cell (cell.id)}
-								<Subscribe attrs={cell.attrs()} let:attrs>
-									<Table.Cell {...attrs}>
-										<Render of={cell.render()} />
-									</Table.Cell>
-								</Subscribe>
-							{/each}
-						</Table.Row>
-					</Subscribe>
-				{/each}
-			</Table.Body>
-		</Table.Root>
+		<div>
+			<Table.Root {...$tableAttrs}>
+				<Table.Header>
+					{#each $headerRows as headerRow}
+						<Subscribe rowAttrs={headerRow.attrs()}>
+							<Table.Row>
+								{#each headerRow.cells as cell (cell.id)}
+									<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()}>
+										<Table.Head {...attrs}>
+											<Render of={cell.render()} />
+										</Table.Head>
+									</Subscribe>
+								{/each}
+							</Table.Row>
+						</Subscribe>
+					{/each}
+				</Table.Header>
+				<Table.Body {...$tableBodyAttrs}>
+					{#each $pageRows as row (row.id)}
+						<Subscribe rowAttrs={row.attrs()} let:rowAttrs>
+							<Table.Row {...rowAttrs}>
+								{#each row.cells as cell (cell.id)}
+									<Subscribe attrs={cell.attrs()} let:attrs>
+										<Table.Cell {...attrs}>
+											<Render of={cell.render()} />
+										</Table.Cell>
+									</Subscribe>
+								{/each}
+							</Table.Row>
+						</Subscribe>
+					{/each}
+				</Table.Body>
+			</Table.Root>
+		</div>
 	</div>
+	{#if $showReceipt.show}
+		test
+		<div class="w-[450px]">
+			<AspectRatio ratio={16 / 9} class="bg-muted">
+				<img
+					src={imageURL}
+					alt="Image of receipt of selected transaction"
+					class="rounded-md object-cover"
+				/>
+			</AspectRatio>
+		</div>
+	{/if}
 	<div class="flex items-center justify-end space-x-4 py-4">
 		<Button variant="outline" size="sm" on:click={() => $pageIndex--} disabled={!$hasPreviousPage}
 			>Previous</Button

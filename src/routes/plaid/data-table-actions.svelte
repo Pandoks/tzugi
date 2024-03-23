@@ -3,11 +3,12 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Button } from '$lib/components/ui/button';
 	import { getContext } from 'svelte';
+	import { type Writable } from 'svelte/store';
 
 	export let transactionId: string;
 	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
 	let file: FileList;
-	const receiptStatus = getContext('showReceipt');
+	const showReceipt = getContext<Writable<{ imagePath: string; show: boolean }>>('showReceipt');
 
 	const handleUpload = async () => {
 		if (file && file.length > 0) {
@@ -33,6 +34,19 @@
 			}
 		}
 	};
+
+	const getReceipt = async () => {
+		const response = await fetch('/api/receipt', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ transactionId: transactionId })
+		});
+
+		const { imagePath } = await response.json();
+		$showReceipt = { imagePath: imagePath, show: true };
+	};
 </script>
 
 <DropdownMenu.Root closeOnItemClick={false}>
@@ -57,8 +71,6 @@
 			</div>
 			<button type="submit" on:click={handleUpload}>Submit</button>
 		</DropdownMenu.Item>
-		<DropdownMenu.Item on:click={() => navigator.clipboard.writeText(transactionId)}>
-			View Image
-		</DropdownMenu.Item>
+		<DropdownMenu.Item on:click={getReceipt}>View Image</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
