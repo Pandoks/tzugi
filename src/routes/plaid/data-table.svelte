@@ -44,7 +44,7 @@
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
 		table.createViewModel(columns);
 
-	const { pageIndex, pageCount, pageSize, hasNextPage, hasPreviousPage } = pluginStates.page;
+	const { pageIndex, pageCount, hasNextPage, hasPreviousPage } = pluginStates.page;
 	$: paginationButtonTextList = paginationTextGenerator({
 		pageIndex: $pageIndex,
 		pageCount: $pageCount

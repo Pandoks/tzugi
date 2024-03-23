@@ -96,6 +96,10 @@ export const GET: RequestHandler = async (event) => {
 		.where(eq(transactionsTable.userId, user.id))
 		.orderBy(desc(transactionsTable.timestamp));
 	const transactions = transactionsQuery.map((transaction) => transaction.data);
+	transactions.sort(
+		(firstTransaction, secondTransaction) =>
+			new Date(secondTransaction.date).getTime() - new Date(firstTransaction.date).getTime()
+	);
 
 	return json({ transactions: transactions });
 };

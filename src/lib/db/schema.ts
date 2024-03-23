@@ -9,6 +9,7 @@ import {
 	uuid,
 	varchar
 } from 'drizzle-orm/pg-core';
+import { type Transaction } from 'plaid';
 
 export const users = pgTable('users', {
 	id: uuid('id').primaryKey().notNull()
@@ -42,7 +43,7 @@ export const transactions = pgTable(
 		userId: uuid('user_id').notNull(),
 		institutionId: text('institution_id').notNull(),
 		timestamp: timestamp('timestamp', { mode: 'date', withTimezone: true }),
-		data: json('data').notNull(),
+		data: json('data').notNull().$type<Transaction>(),
 		imagePath: text('image_path').notNull().default('')
 	},
 	(table) => {
