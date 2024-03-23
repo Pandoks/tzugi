@@ -9,6 +9,8 @@ export const POST: RequestHandler = async (event) => {
 	} = await event.locals.supabase.auth.getUser();
 
 	const { transactionId } = await event.request.json();
+	if (!transactionId) return json({ success: false, imagePath: '' });
+
 	const [transaction] = await db
 		.select()
 		.from(transactions)
