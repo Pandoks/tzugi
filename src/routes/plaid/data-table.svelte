@@ -6,6 +6,7 @@
 	import DataTableActions from './data-table-actions.svelte';
 	import { addPagination } from 'svelte-headless-table/plugins';
 	import { Button } from '$lib/components/ui/button';
+	import { paginationTextGenerator } from '$lib/utils';
 
 	export let transactions: Transaction[] = [];
 	const transactionsStore = writable(transactions);
@@ -44,6 +45,10 @@
 		table.createViewModel(columns);
 
 	const { pageIndex, pageCount, pageSize, hasNextPage, hasPreviousPage } = pluginStates.page;
+	$: paginationButtonTextList = paginationTextGenerator({
+		pageIndex: $pageIndex,
+		pageCount: $pageCount
+	});
 </script>
 
 <div>
@@ -86,13 +91,21 @@
 			>Previous</Button
 		>
 		<div>
-			{#if $pageIndex > 0 && $pageIndex < $pageCount - 1}
-				{$pageIndex + 1}
-			{:else if $pageIndex === 0}
-				{test}
-			{:else}
-				{$pageIndex + 1}
-			{/if}
+			{#each paginationButtonTextList as paginationButtonText}
+				<Button
+					class="pagination-button bg-transparent text-sm p-2 min-w-14 text-center whitespace-nowrap disabled:opacity-50"
+					variant="ghost"
+					size="sm"
+					disabled={paginationButtonText === 'current' || paginationButtonText === '...'}
+					on:click={() => ($pageIndex = parseInt(paginationButtonText) - 1)}
+				>
+					{#if paginationButtonText === 'current'}
+						{$pageIndex + 1}
+					{:else}
+						{paginationButtonText}
+					{/if}
+				</Button>
+			{/each}
 		</div>
 		<Button variant="outline" size="sm" disabled={!$hasNextPage} on:click={() => $pageIndex++}
 			>Next</Button
