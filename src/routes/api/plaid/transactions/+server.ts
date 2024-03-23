@@ -1,4 +1,4 @@
-import { plaid as plaidClient } from '$lib/plaid';
+import { plaid as plaidClient } from '$lib/server/plaid';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import type { RemovedTransaction, Transaction, TransactionsSyncRequest } from 'plaid';
 import { db } from '$lib/db';

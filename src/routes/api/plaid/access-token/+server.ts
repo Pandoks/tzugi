@@ -1,6 +1,6 @@
 import { db } from '$lib/db';
 import { plaid } from '$lib/db/schema';
-import { plaid as plaidClient } from '$lib/plaid';
+import { plaid as plaidClient } from '$lib/server/plaid';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async (event) => {

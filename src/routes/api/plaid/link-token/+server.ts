@@ -1,4 +1,4 @@
-import { plaid } from '$lib/plaid';
+import { plaid } from '$lib/server/plaid';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { CountryCode, Products } from 'plaid';
 
