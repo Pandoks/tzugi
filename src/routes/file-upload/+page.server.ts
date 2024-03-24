@@ -10,6 +10,7 @@ import { desc, eq } from 'drizzle-orm';
 
 export const actions: Actions = {
 	default: async (event) => {
+		console.log('hit');
 		const {
 			data: { user }
 		} = await event.locals.supabase.auth.getUser();

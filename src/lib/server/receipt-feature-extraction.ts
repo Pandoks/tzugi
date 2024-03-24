@@ -7,8 +7,8 @@ export const receiptFeatureExtraction = async (receiptImage: File) => {
 	const buffer = Buffer.from(await receiptImage.arrayBuffer());
 	const { data, error } = await detectWordsFromImage(buffer);
 	const prompt = `
-Based on the following text, what is the total of the transaction, date of the transaction, payment channel of transaction, and the last 4 digits of the credit card used for the transaction?
-Give me the answer in strictly json: {total: <total>, date: <date>, channel: <channel>, card: <card>}. Here are the instructions for the json:
+Based on the following text, what is the total of the transaction, date of the transaction, payment channel of transaction, merchant name, and the last 4 digits of the credit card used for the transaction?
+Give me the answer in strictly json: {total: <total>, date: <date>, channel: <channel>, merchant: <merchant>, card: <card>}. Here are the instructions for the json:
 For payment channel this is a description of the ONLY options you can choose from. Do not make up anything. Only choose from this list:
 "online": transactions that took place online; "in store": transactions that were made at a physical location; "other": transactions that relate to banks, e.g. fees or deposits
 For the date field, make sure you also include the time in parentheses. Different receipts may have different formatted dates and times. You will use this format even if the format of the date on the receipt is different:
@@ -31,6 +31,7 @@ export type ReceiptFeatures = {
 	total: string;
 	date: string;
 	channel: string;
+	merchant: string;
 	card: string;
 };
 
@@ -38,6 +39,7 @@ export type ReceiptTransactionSimilarity = {
 	total: number;
 	date: number;
 	channel: number;
+	merchant: number;
 	card: number;
 };
 
@@ -52,6 +54,7 @@ export const receiptTransactionSimilarity = ({
 		total: Infinity,
 		date: Infinity,
 		channel: Infinity,
+		merchant: Infinity,
 		card: Infinity
 	};
 
@@ -67,6 +70,11 @@ export const receiptTransactionSimilarity = ({
 	receiptTransactionSimilarity.channel = levenshtein.get(
 		receipt.channel,
 		transaction.payment_channel
+	);
+
+	receiptTransactionSimilarity.merchant = levenshtein.get(
+		receipt.merchant,
+		transaction.merchant_name ? transaction.merchant_name : ''
 	);
 
 	if (!transaction.account_owner) {
