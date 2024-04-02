@@ -7,6 +7,7 @@ import {
 import { error, json, type Actions } from '@sveltejs/kit';
 import { transactions } from '$lib/db/schema';
 import { desc, eq } from 'drizzle-orm';
+import { detectFeaturesFromImage } from '$lib/server/google-vision';
 
 export const actions: Actions = {
 	default: async (event) => {
@@ -23,13 +24,11 @@ export const actions: Actions = {
 		}
 
 		const { fileUpload } = formData as { fileUpload: File };
-		const receiptFeatures = await receiptFeatureExtraction(fileUpload);
-		let receiptFeaturesJson: ReceiptFeatures;
-		try {
-			receiptFeaturesJson = JSON.parse(receiptFeatures);
-		} catch (err) {
-			return error(500, "Couldn't parse data");
-		}
+		const fileBuffer = Buffer.from(await fileUpload.arrayBuffer());
+		const { businessName, date, total, text } = await detectFeaturesFromImage(
+			fileBuffer,
+			fileUpload.type
+		);
 
 		const transactionsQuery = await db
 			.select()

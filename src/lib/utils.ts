@@ -105,3 +105,28 @@ export const blobToBuffer = async (blob: Blob): Promise<Buffer> => {
 	const arrayBuffer = await blob.arrayBuffer();
 	return Buffer.from(arrayBuffer);
 };
+
+export const extractJSONTextFromLLMResponse = (llmResponse: string) => {
+	const jsonRegex = /```json\s*([\s\S]*?)\s*```/;
+	const jsRegex = /```js\s*([\s\S]*?)\s*```/;
+	const jsonMatch = llmResponse.match(jsonRegex);
+	const jsMatch = llmResponse.match(jsRegex);
+
+	let isJsonMatch = true;
+	if (!jsonMatch && !jsMatch) {
+		throw new Error("Can't extract json");
+	} else if (!jsonMatch) {
+		isJsonMatch = false;
+	}
+	try {
+		if (isJsonMatch) {
+			JSON.parse(jsonMatch![1]);
+		} else {
+			JSON.parse(jsMatch![1]);
+		}
+	} catch {
+		throw new Error("Can't extract json");
+	}
+
+	return isJsonMatch ? jsonMatch![1] : jsMatch![1];
+};

@@ -49,6 +49,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@google-cloud/documentai": "^8.2.0",
 		"@google-cloud/vision": "^4.1.0",
 		"@supabase/ssr": "^0.1.0",
 		"@supabase/supabase-js": "^2.39.7",
