@@ -45,15 +45,12 @@ export const POSt: RequestHandler = async (event) => {
 
 	const { fileUpload } = formData as { fileUpload: File };
 	const fileBuffer = Buffer.from(await fileUpload.arrayBuffer());
-	const { businessName, date, total, text } = await detectFeaturesFromImage(
-		fileBuffer,
-		fileUpload.type
-	);
+	const { text } = await detectFeaturesFromImage(fileBuffer, fileUpload.type);
 
 	const filePath = `${user!.id}/${new Date().getTime()}.${fileUpload.name.split('.').pop()}`;
 	const imageBuffer = Buffer.from(await fileUpload.arrayBuffer());
 
-	const { data, err } = await event.locals.supabase.storage
+	const { data } = await event.locals.supabase.storage
 		.from('receipts')
 		.upload(filePath, new Uint8Array(imageBuffer), {
 			cacheControl: '3600',
