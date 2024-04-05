@@ -50,20 +50,16 @@ Give an explanation on how you got to the answer for each field.
 export type ReceiptFeatures = {
 	total: string;
 	date: string;
-	channel: string;
 	merchant: string;
-	card: string;
 };
 
 export type ReceiptTransactionSimilarity = {
 	total: number;
 	date: number;
-	channel: number;
 	merchant: number;
-	card: number;
 };
 
-export const receiptTransactionSimilarity = ({
+export const receiptTransactionFeatureSimilarity = ({
 	receipt,
 	transaction
 }: {
@@ -73,35 +69,21 @@ export const receiptTransactionSimilarity = ({
 	let receiptTransactionSimilarity: ReceiptTransactionSimilarity = {
 		total: Infinity,
 		date: Infinity,
-		channel: Infinity,
-		merchant: Infinity,
-		card: Infinity
+		merchant: Infinity
 	};
 
-	// lower distance the more similar
+	// lower distance the more similar (0 is exactly the same)
 	receiptTransactionSimilarity.total = levenshtein.get(
 		receipt.total,
 		transaction.amount.toString()
 	);
 
-	const parsedDate = receipt.date.split(' ')[0];
-	receiptTransactionSimilarity.date = levenshtein.get(parsedDate, transaction.date);
-
-	receiptTransactionSimilarity.channel = levenshtein.get(
-		receipt.channel,
-		transaction.payment_channel
-	);
+	receiptTransactionSimilarity.date = levenshtein.get(receipt.date, transaction.date);
 
 	receiptTransactionSimilarity.merchant = levenshtein.get(
 		receipt.merchant,
 		transaction.merchant_name ? transaction.merchant_name : ''
 	);
-
-	if (!transaction.account_owner) {
-		receiptTransactionSimilarity.card = levenshtein.get(receipt.card, '');
-	} else {
-		receiptTransactionSimilarity.card = levenshtein.get(receipt.card, transaction.account_owner);
-	}
 
 	return receiptTransactionSimilarity;
 };

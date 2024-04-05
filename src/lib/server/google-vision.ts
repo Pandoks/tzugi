@@ -120,7 +120,7 @@ export const detectFeaturesFromImage = async (image: Buffer, mimeType: string) =
 		businessName: mostFrequentTransactionBusinessName,
 		date: mostFrequentTransactionDateTime,
 		total: mostFrequentTransactionPaymentTotal,
-		text: document.text
+		text: document.text || ''
 	};
 	return receiptFeatures;
 };

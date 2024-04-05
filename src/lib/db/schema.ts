@@ -44,8 +44,10 @@ export const transactions = pgTable(
 		institutionId: text('institution_id').notNull(),
 		timestamp: timestamp('timestamp', { mode: 'date', withTimezone: true }),
 		data: json('data').notNull().$type<Transaction>(),
-		imagePath: text('image_path').notNull().default(''),
-		text: text('text').notNull().default('')
+		imagePath: text('image_path')
+			.notNull()
+			.default('')
+			.references(() => receipts.imagePath)
 	},
 	(table) => {
 		return {
@@ -65,5 +67,24 @@ export const transactionsRelations = relations(transactions, ({ one }) => ({
 	institution: one(plaid, {
 		fields: [transactions.userId, transactions.institutionId],
 		references: [plaid.userId, plaid.institutionId]
+	}),
+	receipt: one(receipts, {
+		fields: [transactions.imagePath],
+		references: [receipts.imagePath]
+	})
+}));
+
+export const receipts = pgTable('receipts', {
+	imagePath: text('image_path').notNull().primaryKey(),
+	text: text('text').notNull().default(''),
+	userId: uuid('user_id')
+		.notNull()
+		.references(() => users.id)
+});
+
+export const receiptsRelations = relations(receipts, ({ one }) => ({
+	user: one(users, {
+		fields: [receipts.userId],
+		references: [users.id]
 	})
 }));
