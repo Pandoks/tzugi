@@ -26,7 +26,7 @@ export const PATCH: RequestHandler = async (event) => {
 	return json({ success: true });
 };
 
-export const POSt: RequestHandler = async (event) => {
+export const POST: RequestHandler = async (event) => {
 	const {
 		data: { user }
 	} = await event.locals.supabase.auth.getUser();

@@ -8,7 +8,6 @@ import type { Transaction } from 'plaid';
 
 export const actions: Actions = {
 	default: async (event) => {
-		console.log('hit');
 		const {
 			data: { user }
 		} = await event.locals.supabase.auth.getUser();
