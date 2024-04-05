@@ -44,10 +44,7 @@ export const transactions = pgTable(
 		institutionId: text('institution_id').notNull(),
 		timestamp: timestamp('timestamp', { mode: 'date', withTimezone: true }),
 		data: json('data').notNull().$type<Transaction>(),
-		imagePath: text('image_path')
-			.notNull()
-			.default('')
-			.references(() => receipts.imagePath)
+		imagePath: text('image_path').references(() => receipts.imagePath)
 	},
 	(table) => {
 		return {

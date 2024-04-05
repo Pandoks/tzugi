@@ -72,8 +72,7 @@ export const GET: RequestHandler = async (event) => {
 				userId: user.id,
 				institutionId: institutionId,
 				timestamp: new Date(addedTransaction.authorized_date!),
-				data: addedTransaction,
-				imagePath: ''
+				data: addedTransaction
 			})
 			.onConflictDoNothing();
 	}

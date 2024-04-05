@@ -1,5 +1,4 @@
 import { db } from '$lib/db';
-import { receiptTransactionFeatureSimilarity } from '$lib/server/receipt-feature-extraction';
 import { error, json, type Actions } from '@sveltejs/kit';
 import { receipts, transactions } from '$lib/db/schema';
 import { desc, eq } from 'drizzle-orm';
@@ -75,8 +74,25 @@ export const actions: Actions = {
 			}
 		}
 
+		const filePath = `${user!.id}/${new Date().getTime()}.${fileUpload.name.split('.').pop()}`;
+		const imageBuffer = Buffer.from(await fileUpload.arrayBuffer());
+
+		const { data, err } = await event.locals.supabase.storage
+			.from('receipts')
+			.upload(filePath, new Uint8Array(imageBuffer), {
+				cacheControl: '3600',
+				upsert: true,
+				contentType: `image/${fileUpload.name.split('.').pop()}`
+			});
+
+		if (err) {
+			return error(500, "Couldn't upload to server");
+		}
+
+		await db.insert(receipts).values({ imagePath: filePath, text: text, userId: user.id });
+
 		if (!mostSimilarTransaction) {
-			return { success: false };
+			return { matched: false };
 		}
 
 		const [transaction] = await db
@@ -95,28 +111,11 @@ export const actions: Actions = {
 		// API endpoint to upload and replace transaction
 		// Have spinner where it shows user that the image is being matched
 
-		const filePath = `${user!.id}/${new Date().getTime()}.${fileUpload.name.split('.').pop()}`;
-		const imageBuffer = Buffer.from(await fileUpload.arrayBuffer());
-
-		const { data, err } = await event.locals.supabase.storage
-			.from('receipts')
-			.upload(filePath, new Uint8Array(imageBuffer), {
-				cacheControl: '3600',
-				upsert: true,
-				contentType: `image/${fileUpload.name.split('.').pop()}`
-			});
-
-		if (err) {
-			return error(500, "Couldn't upload to server");
-		}
-
-		await db.insert(receipts).values({ imagePath: filePath, text: text, userId: user.id });
-
 		await db
 			.update(transactions)
 			.set({ imagePath: data.fullPath })
 			.where(eq(transactions.id, mostSimilarTransaction.transaction.transaction_id));
 
-		return { success: true };
+		return { matched: true };
 	}
 };
