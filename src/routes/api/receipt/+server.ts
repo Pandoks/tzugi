@@ -6,10 +6,18 @@ import { detectFeaturesFromImage } from '$lib/server/google-vision';
 import levenshtein from 'fast-levenshtein';
 import type { Transaction } from 'plaid';
 
+// TODO: REMEMBER TO ADD ORIGINS TO CORS FOR CSRF PROTECTION BEFORE PRODUCTION
 export const POST: RequestHandler = async (event) => {
+	const access_token = event.request.headers.get('authorization')?.split(' ')[1];
+	if (!access_token) {
+		return error(400, {
+			message: 'User unauthorized'
+		});
+	}
+
 	const {
 		data: { user }
-	} = await event.locals.supabase.auth.getUser();
+	} = await event.locals.supabase.auth.getUser(access_token);
 	if (!user) {
 		return error(400, {
 			message: 'User unauthorized'

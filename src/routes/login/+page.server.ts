@@ -15,13 +15,15 @@ export const actions: Actions = {
 		const email = formData.get('email') as string;
 		const password = formData.get('password') as string;
 
-		const { error } = await event.locals.supabase.auth.signInWithPassword({
+		const { data, error } = await event.locals.supabase.auth.signInWithPassword({
 			email,
 			password,
 			options: {
 				emailRedirectTo: `${event.url.origin}/auth/callback`
 			}
 		});
+
+		console.log(data);
 
 		if (error) {
 			return fail(500, { message: 'Server error. Try again later.', success: false, email });
