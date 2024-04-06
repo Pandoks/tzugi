@@ -1,4 +1,4 @@
-import { type Handle, redirect, error } from '@sveltejs/kit';
+import { type Handle, redirect, error, text, json } from '@sveltejs/kit';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 import { sequence } from '@sveltejs/kit/hooks';
 import { createServerClient } from '@supabase/ssr';
@@ -67,27 +67,39 @@ const authorization: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-// from https://snippets.khromov.se/configure-cors-in-sveltekit-to-access-your-api-routes-from-a-different-host/
-const cors: Handle = async ({ resolve, event }) => {
-	// Apply CORS header for API routes
-	if (event.url.pathname.startsWith('/api')) {
-		// Required for CORS to work
-		if (event.request.method === 'OPTIONS') {
-			return new Response(null, {
-				headers: {
-					'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Headers': '*'
-				}
-			});
+/**
+ * CSRF protection copied from sveltekit but with the ability to turn it off for specific routes.
+ */
+const csrf =
+	(allowedPaths: string[]): Handle =>
+	async ({ event, resolve }) => {
+		const forbidden =
+			event.request.method === 'POST' &&
+			event.request.headers.get('origin') !== event.url.origin &&
+			isFormContentType(event.request) &&
+			!allowedPaths.includes(event.url.pathname);
+
+		if (forbidden) {
+			const csrfError = error(
+				403,
+				`Cross-site ${event.request.method} form submissions are forbidden`
+			);
+			if (event.request.headers.get('accept') === 'application/json') {
+				// @ts-ignore
+				return json(csrfError.body, { status: csrfError.status });
+			}
+			// @ts-ignore
+			return text(csrfError.body.message, { status: csrfError.status });
 		}
-	}
 
-	const response = await resolve(event);
-	if (event.url.pathname.startsWith('/api')) {
-		response.headers.append('Access-Control-Allow-Origin', `*`);
-	}
-	return response;
-};
+		return resolve(event);
+	};
+function isContentType(request: Request, ...types: string[]) {
+	const type = request.headers.get('content-type')?.split(';', 1)[0].trim() ?? '';
+	return types.includes(type);
+}
+function isFormContentType(request: Request) {
+	return isContentType(request, 'application/x-www-form-urlencoded', 'multipart/form-data');
+}
 
-export const handle: Handle = sequence(supabase, cors);
+export const handle: Handle = sequence(supabase, csrf(['/api/receipt']));

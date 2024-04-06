@@ -13,12 +13,6 @@ export const actions: Actions = {
 		} = await event.locals.supabase.auth.getUser();
 		const formData = Object.fromEntries(await event.request.formData());
 
-		if (!(formData.fileUpload as File).name || (formData.fileUpload as File).name === 'undefined') {
-			return error(400, {
-				message: 'You must provide a file to upload'
-			});
-		}
-
 		const { fileUpload } = formData as { fileUpload: File };
 		const fileBuffer = Buffer.from(await fileUpload.arrayBuffer());
 		const { businessName, date, total, text } = await detectFeaturesFromImage(

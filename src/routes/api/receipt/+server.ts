@@ -12,7 +12,7 @@ export const POST: RequestHandler = async (event) => {
 	} = await event.locals.supabase.auth.getUser();
 	const formData = Object.fromEntries(await event.request.formData());
 
-	if (!(formData.fileUpload as File).name || (formData.fileUpload as File).name === 'undefined') {
+	if (!(formData.fileUpload as File)) {
 		return error(400, {
 			message: 'You must provide a file to upload'
 		});
