@@ -9,6 +9,12 @@ export const PATCH: RequestHandler = async (event) => {
 	const {
 		data: { user }
 	} = await event.locals.supabase.auth.getUser();
+	if (!user) {
+		return error(400, {
+			message: 'User unauthorized'
+		});
+	}
+
 	const transactionId = event.params.transactionId;
 	if (!transactionId) {
 		return error(500, 'No id');
@@ -30,6 +36,12 @@ export const POST: RequestHandler = async (event) => {
 	const {
 		data: { user }
 	} = await event.locals.supabase.auth.getUser();
+	if (!user) {
+		return error(400, {
+			message: 'User unauthorized'
+		});
+	}
+
 	const transactionId = event.params.transactionId;
 	if (!transactionId) {
 		return error(500, 'No id');
