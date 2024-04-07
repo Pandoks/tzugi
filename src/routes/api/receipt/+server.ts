@@ -5,19 +5,12 @@ import { desc, eq } from 'drizzle-orm';
 import { detectFeaturesFromImage } from '$lib/server/google-vision';
 import levenshtein from 'fast-levenshtein';
 import type { Transaction } from 'plaid';
+import { findUser } from '$lib/server/auth';
 
 // TODO: REMEMBER TO ADD ORIGINS TO CORS FOR CSRF PROTECTION BEFORE PRODUCTION
+// TODO: Allow for multiple photos to correspond to a single transaction
 export const POST: RequestHandler = async (event) => {
-	const access_token = event.request.headers.get('authorization')?.split(' ')[1];
-	if (!access_token) {
-		return error(400, {
-			message: 'User unauthorized'
-		});
-	}
-
-	const {
-		data: { user }
-	} = await event.locals.supabase.auth.getUser(access_token);
+	const user = await findUser(event);
 	if (!user) {
 		return error(400, {
 			message: 'User unauthorized'
