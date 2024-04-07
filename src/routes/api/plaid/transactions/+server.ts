@@ -4,11 +4,15 @@ import type { RemovedTransaction, Transaction, TransactionsSyncRequest } from 'p
 import { db } from '$lib/db';
 import { plaid, transactions as transactionsTable } from '$lib/db/schema';
 import { and, desc, eq } from 'drizzle-orm';
+import { findUser } from '$lib/server/auth';
 
 export const GET: RequestHandler = async (event) => {
-	const {
-		data: { user }
-	} = await event.locals.supabase.auth.getUser();
+	const user = await findUser(event);
+	if (!user) {
+		return error(400, {
+			message: 'User unauthorized'
+		});
+	}
 	const [{ cursor, accessToken, institutionId }] = await db
 		.select()
 		.from(plaid)

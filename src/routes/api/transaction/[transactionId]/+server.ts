@@ -1,14 +1,12 @@
 import { db } from '$lib/db';
 import { receipts, transactions } from '$lib/db/schema';
+import { findUser } from '$lib/server/auth';
 import { detectFeaturesFromImage } from '$lib/server/google-vision';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 
 export const PATCH: RequestHandler = async (event) => {
-	// TODO: protect this route with auth
-	const {
-		data: { user }
-	} = await event.locals.supabase.auth.getUser();
+	const user = await findUser(event);
 	if (!user) {
 		return error(400, {
 			message: 'User unauthorized'
@@ -33,9 +31,7 @@ export const PATCH: RequestHandler = async (event) => {
 };
 
 export const POST: RequestHandler = async (event) => {
-	const {
-		data: { user }
-	} = await event.locals.supabase.auth.getUser();
+	const user = await findUser(event);
 	if (!user) {
 		return error(400, {
 			message: 'User unauthorized'

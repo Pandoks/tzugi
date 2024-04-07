@@ -1,17 +1,16 @@
+import { findUser } from '$lib/server/auth';
 import { plaid } from '$lib/server/plaid';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { CountryCode, Products } from 'plaid';
 
 export const GET: RequestHandler = async (event) => {
-	const session = await event.locals.getSession();
-	if (!session) {
-		// the user is not signed in
-		throw error(401, { message: 'Unauthorized' });
+	const user = await findUser(event);
+	if (!user) {
+		return error(400, {
+			message: 'User unauthorized'
+		});
 	}
 
-	const {
-		data: { user }
-	} = await event.locals.supabase.auth.getUser();
 	const request = {
 		user: {
 			client_user_id: user.id

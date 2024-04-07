@@ -1,17 +1,21 @@
 import { db } from '$lib/db';
 import { plaid } from '$lib/db/schema';
+import { findUser } from '$lib/server/auth';
 import { plaid as plaidClient } from '$lib/server/plaid';
-import { json, type RequestHandler } from '@sveltejs/kit';
+import { error, json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async (event) => {
+	const user = await findUser(event);
+	if (!user) {
+		return error(400, {
+			message: 'User unauthorized'
+		});
+	}
+
 	const { public_token, metadata } = await event.request.json();
 	const tokenResponse = await plaidClient.itemPublicTokenExchange({
 		public_token: public_token
 	});
-
-	const {
-		data: { user }
-	} = await event.locals.supabase.auth.getUser();
 
 	await db
 		.insert(plaid)

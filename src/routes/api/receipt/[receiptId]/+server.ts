@@ -1,12 +1,11 @@
 import { db } from '$lib/db';
 import { receipts, transactions } from '$lib/db/schema';
+import { findUser } from '$lib/server/auth';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 
 export const DELETE: RequestHandler = async (event) => {
-	const {
-		data: { user }
-	} = await event.locals.supabase.auth.getUser();
+	const user = await findUser(event);
 	if (!user) {
 		return error(400, {
 			message: 'User unauthorized'
