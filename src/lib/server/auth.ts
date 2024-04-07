@@ -15,7 +15,7 @@ export const findUser = async (event: RequestEvent) => {
 
 	const {
 		data: { user }
-	} = event.locals.supabase.auth.getUser(access_token);
+	} = await event.locals.supabase.auth.getUser(access_token);
 	if (!user) {
 		return null;
 	}

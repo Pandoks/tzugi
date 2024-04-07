@@ -102,4 +102,12 @@ function isFormContentType(request: Request) {
 	return isContentType(request, 'application/x-www-form-urlencoded', 'multipart/form-data');
 }
 
-export const handle: Handle = sequence(supabase, csrf(['/api/receipt']));
+export const handle: Handle = sequence(
+	supabase,
+	csrf([
+		'/api/receipt',
+		'/api/plaid/access-token',
+		'/api/plaid/link-token',
+		'/api/plaid/transaction'
+	])
+);
