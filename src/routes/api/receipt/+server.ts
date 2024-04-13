@@ -7,8 +7,6 @@ import levenshtein from 'fast-levenshtein';
 import type { Transaction } from 'plaid';
 import { findUser } from '$lib/server/auth';
 
-// TODO: REMEMBER TO ADD ORIGINS TO CORS FOR CSRF PROTECTION BEFORE PRODUCTION
-// TODO: Allow for multiple photos to correspond to a single transaction
 export const POST: RequestHandler = async (event) => {
 	const user = await findUser(event);
 	if (!user) {

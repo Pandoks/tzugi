@@ -17,7 +17,9 @@ export const GET: RequestHandler = async (event) => {
 		.select()
 		.from(plaid)
 		.where(eq(plaid.userId, user.id));
-	if (!accessToken) return error(404);
+	if (!accessToken || !cursor || !institutionId) {
+		return error(400, { message: "Couldn't retrieve data from database" });
+	}
 
 	let temporaryCursor = cursor;
 
@@ -34,6 +36,11 @@ export const GET: RequestHandler = async (event) => {
 				cursor: temporaryCursor!
 			};
 			const response = await plaidClient.transactionsSync(request);
+			if (!response) {
+				return error(400, {
+					message: "Couldn't sync with plaid"
+				});
+			}
 			const data = response.data;
 
 			added = added.concat(data.added);

@@ -21,5 +21,9 @@ export const GET: RequestHandler = async (event) => {
 		country_codes: [CountryCode.Us]
 	};
 	const tokenResponse = await plaid.linkTokenCreate(request);
+	if (!tokenResponse) {
+		return error(400, { message: "Couldn't get a token response" });
+	}
+
 	return json(tokenResponse.data);
 };
