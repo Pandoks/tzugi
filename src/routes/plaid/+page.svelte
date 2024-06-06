@@ -44,13 +44,19 @@
     const plaidClient = Plaid.create(config);
     return plaidClient;
   };
+
+  const openPlaidLogin = () => {
+    if (plaid_login) {
+      plaid_login.open();
+    }
+  };
 </script>
 
 <svelte:head>
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 </svelte:head>
 
-<Button on:click={plaid_login.open()}>Link Plaid Account</Button>
+<Button on:click={openPlaidLogin}>Link Plaid Account</Button>
 <Button on:click={getTransactions}>Get Transactions</Button>
 <div class="container mx-auto py-10">
   <DataTable {transactions} supabase={data.supabase} />
