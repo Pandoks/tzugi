@@ -5,30 +5,30 @@ import { combineChunks, createBrowserClient, isBrowser, parse } from '@supabase/
 import type { Load } from '@sveltejs/kit';
 
 export const load: Load = async ({ fetch, data, depends }) => {
-	depends('supabase:auth');
+  depends('supabase:auth');
 
-	const supabase = createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
-		global: {
-			fetch
-		},
-		cookies: {
-			get(key) {
-				if (!isBrowser()) {
-					return JSON.stringify(data!.session);
-				}
+  const supabase = createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+    global: {
+      fetch
+    },
+    cookies: {
+      get(key) {
+        if (!isBrowser()) {
+          return JSON.stringify(data!.session);
+        }
 
-				const cookie = combineChunks(key, (name) => {
-					const cookies = parse(document.cookie);
-					return cookies[name];
-				});
-				return cookie;
-			}
-		}
-	});
+        const cookie = combineChunks(key, (name) => {
+          const cookies = parse(document.cookie);
+          return cookies[name];
+        });
+        return cookie;
+      }
+    }
+  });
 
-	const {
-		data: { session }
-	} = await supabase.auth.getSession();
+  const {
+    data: { session }
+  } = await supabase.auth.getSession();
 
-	return { supabase, session };
+  return { supabase, session };
 };

@@ -4,8 +4,8 @@ import { extractJSONTextFromLLMResponse } from '$lib/utils';
 import levenshtein from 'fast-levenshtein';
 
 describe('LLM prompt', () => {
-	const generatePrompt = (data: string) => {
-		return `
+  const generatePrompt = (data: string) => {
+    return `
 This is some text that is extracted from a transaction receipt: \`${data}\`
 
 Respond in only JSON format and nothing else.
@@ -25,60 +25,60 @@ Format it with \`json\` markdown.
 
 Give an explanation on how you got to the answer for each field.
 `;
-	};
+  };
 
-	// 99% passing rate
-	test('Missing data (json input)', { timeout: 1000000 }, async () => {
-		const prompt = generatePrompt(JSON.stringify({ total: '' }));
-		const {
-			message: { content }
-		} = await ollama({ model: 'mistral', prompt: prompt });
-		const extractedJSON = extractJSONTextFromLLMResponse(content);
-		expect(JSON.parse(extractedJSON)).toStrictEqual({
-			total: '',
-			date: '',
-			merchant: '',
-			card: ''
-		});
-	});
+  // 99% passing rate
+  test('Missing data (json input)', { timeout: 1000000 }, async () => {
+    const prompt = generatePrompt(JSON.stringify({ total: '' }));
+    const {
+      message: { content }
+    } = await ollama({ model: 'mistral', prompt: prompt });
+    const extractedJSON = extractJSONTextFromLLMResponse(content);
+    expect(JSON.parse(extractedJSON)).toStrictEqual({
+      total: '',
+      date: '',
+      merchant: '',
+      card: ''
+    });
+  });
 
-	// 95% passing rate
-	test('Some null in data (json input)', { timeout: 1000000 }, async () => {
-		const prompt = generatePrompt(
-			JSON.stringify({ total: 12.34, date: '', merchant: 'Uber Eats', card: '1234' })
-		);
-		const {
-			message: { content }
-		} = await ollama({ model: 'mistral', prompt: prompt });
-		const extractedJSON = extractJSONTextFromLLMResponse(content);
-		expect(JSON.parse(extractedJSON)).toStrictEqual({
-			total: '12.34',
-			date: '',
-			merchant: 'Uber Eats',
-			card: '1234'
-		});
-	});
+  // 95% passing rate
+  test('Some null in data (json input)', { timeout: 1000000 }, async () => {
+    const prompt = generatePrompt(
+      JSON.stringify({ total: 12.34, date: '', merchant: 'Uber Eats', card: '1234' })
+    );
+    const {
+      message: { content }
+    } = await ollama({ model: 'mistral', prompt: prompt });
+    const extractedJSON = extractJSONTextFromLLMResponse(content);
+    expect(JSON.parse(extractedJSON)).toStrictEqual({
+      total: '12.34',
+      date: '',
+      merchant: 'Uber Eats',
+      card: '1234'
+    });
+  });
 
-	// 90% passing rate
-	test('Missing data (natural input)', { timeout: 1000000 }, async () => {
-		const prompt = generatePrompt(
-			'Aute fugiat voluptate consectetur ea consectetur. Minim enim in qui id reprehenderit nulla tempor magna mollit. Ad anim enim magna sit magna adipisicing eu nulla magna nostrud excepteur labore reprehenderit. Duis consectetur nisi tempor aliquip nostrud. Anim do laboris irure veniam. Duis Lorem do quis voluptate.'
-		);
-		const {
-			message: { content }
-		} = await ollama({ model: 'mistral', prompt: prompt });
-		const extractedJSON = extractJSONTextFromLLMResponse(content);
-		// console.log(content);
-		expect(JSON.parse(extractedJSON)).toStrictEqual({
-			total: '',
-			date: '',
-			merchant: '',
-			card: ''
-		});
-	});
+  // 90% passing rate
+  test('Missing data (natural input)', { timeout: 1000000 }, async () => {
+    const prompt = generatePrompt(
+      'Aute fugiat voluptate consectetur ea consectetur. Minim enim in qui id reprehenderit nulla tempor magna mollit. Ad anim enim magna sit magna adipisicing eu nulla magna nostrud excepteur labore reprehenderit. Duis consectetur nisi tempor aliquip nostrud. Anim do laboris irure veniam. Duis Lorem do quis voluptate.'
+    );
+    const {
+      message: { content }
+    } = await ollama({ model: 'mistral', prompt: prompt });
+    const extractedJSON = extractJSONTextFromLLMResponse(content);
+    // console.log(content);
+    expect(JSON.parse(extractedJSON)).toStrictEqual({
+      total: '',
+      date: '',
+      merchant: '',
+      card: ''
+    });
+  });
 
-	test('Some null in data (natural input)', { timeout: 1000000 }, async () => {
-		const prompt = generatePrompt(`Michael's
+  test('Some null in data (natural input)', { timeout: 1000000 }, async () => {
+    const prompt = generatePrompt(`Michael's
 Made by you
 MICHAELS STORE #9010 (386) 767-7495
 MICHAELS STORE #9010
@@ -148,15 +148,15 @@ return policy from the date of purchase.
 Please see a store
 associate for more information.
 1/04/22 13:03`);
-		const {
-			message: { content }
-		} = await ollama({ model: 'mistral', prompt: prompt });
-		const extractedJSON = extractJSONTextFromLLMResponse(content);
-		// console.log(content);
-		// console.log(extractedJSON);
-		console.log(
-			levenshtein.get(
-				`Michael's
+    const {
+      message: { content }
+    } = await ollama({ model: 'mistral', prompt: prompt });
+    const extractedJSON = extractJSONTextFromLLMResponse(content);
+    // console.log(content);
+    // console.log(extractedJSON);
+    console.log(
+      levenshtein.get(
+        `Michael's
 Made by you
 MICHAELS STORE #9010 (386) 767-7495
 MICHAELS STORE #9010
@@ -226,12 +226,12 @@ return policy from the date of purchase.
 Please see a store
 associate for more information.
 1/04/22 13:03`,
-				JSON.stringify({ card: '4491', total: '26.65', merchant: 'Michaels', date: '01/04/22' })
-			)
-		);
-		console.log(
-			levenshtein.get(
-				`Michael's
+        JSON.stringify({ card: '4491', total: '26.65', merchant: 'Michaels', date: '01/04/22' })
+      )
+    );
+    console.log(
+      levenshtein.get(
+        `Michael's
 Made by you
 MICHAELS STORE #9010 (386) 767-7495
 MICHAELS STORE #9010
@@ -301,8 +301,8 @@ return policy from the date of purchase.
 Please see a store
 associate for more information.
 1/04/22 13:03`,
-				JSON.stringify({ card: '5692', total: '100', merchant: 'McDonals', date: '12/23/23' })
-			)
-		);
-	});
+        JSON.stringify({ card: '5692', total: '100', merchant: 'McDonals', date: '12/23/23' })
+      )
+    );
+  });
 });

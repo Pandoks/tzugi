@@ -4,24 +4,24 @@ import { ollama } from './ollama';
 import levenshtein from 'fast-levenshtein';
 
 export const receiptFeatureExtraction = async (receiptImage: File) => {
-	const buffer = Buffer.from(await receiptImage.arrayBuffer());
-	const { data, error } = await detectWordsFromImage(buffer);
-	// 	const prompt = `
-	// Based on the following text, what is the total of the transaction, date of the transaction, payment channel of transaction, merchant name of the transaction, and the last 4 digits of the credit card used for the transaction?
-	// Give me the answer in strictly json: {total: <total>, date: <date>, channel: <channel>, merchant: <merchant>, card: <card>}. Here are the instructions for the json:
-	// For payment channel this is a description of the ONLY options you can choose from. Do not make up anything. Only choose from this list:
-	// "online": transactions that took place online; "in store": transactions that were made at a physical location; "other": transactions that relate to banks, e.g. fees or deposits
-	// For the date field, make sure you also include the time in parentheses. Different receipts may have different formatted dates and times. You will use this format even if the format of the date on the receipt is different:
-	// date: YYYY-MM-DD (HH:MM) where HH:MM is in 24 hour format. If you can't figure out the time, then only put ().
-	// For card field in the json, ONLY include the last 4 or 5 digits. Do NOT include "*" or any other symbols. There should only be 4 or 5 NUMBERS.
-	// For total, only include the number (ie. NNN.NN) with no symbols.
-	// If you cannot justify your answer or don't 100% know for sure, just put the field as null.
-	// Don't give me anything else. Only reply with json where each field is a string.
-	//
-	// Here is the data:
-	// ${data}
-	// `;
-	const prompt = `
+  const buffer = Buffer.from(await receiptImage.arrayBuffer());
+  const { data, error } = await detectWordsFromImage(buffer);
+  // 	const prompt = `
+  // Based on the following text, what is the total of the transaction, date of the transaction, payment channel of transaction, merchant name of the transaction, and the last 4 digits of the credit card used for the transaction?
+  // Give me the answer in strictly json: {total: <total>, date: <date>, channel: <channel>, merchant: <merchant>, card: <card>}. Here are the instructions for the json:
+  // For payment channel this is a description of the ONLY options you can choose from. Do not make up anything. Only choose from this list:
+  // "online": transactions that took place online; "in store": transactions that were made at a physical location; "other": transactions that relate to banks, e.g. fees or deposits
+  // For the date field, make sure you also include the time in parentheses. Different receipts may have different formatted dates and times. You will use this format even if the format of the date on the receipt is different:
+  // date: YYYY-MM-DD (HH:MM) where HH:MM is in 24 hour format. If you can't figure out the time, then only put ().
+  // For card field in the json, ONLY include the last 4 or 5 digits. Do NOT include "*" or any other symbols. There should only be 4 or 5 NUMBERS.
+  // For total, only include the number (ie. NNN.NN) with no symbols.
+  // If you cannot justify your answer or don't 100% know for sure, just put the field as null.
+  // Don't give me anything else. Only reply with json where each field is a string.
+  //
+  // Here is the data:
+  // ${data}
+  // `;
+  const prompt = `
 This is some text that is extracted from a transaction receipt: ${data}.
 
 Respond in only JSON format and nothing else.
@@ -41,49 +41,49 @@ Make sure to include all fields.
 Give an explanation on how you got to the answer for each field.
 `;
 
-	const {
-		message: { content }
-	} = await ollama({ model: 'mixtral', prompt: prompt });
-	return content;
+  const {
+    message: { content }
+  } = await ollama({ model: 'mixtral', prompt: prompt });
+  return content;
 };
 
 export type ReceiptFeatures = {
-	total: string;
-	date: string;
-	merchant: string;
+  total: string;
+  date: string;
+  merchant: string;
 };
 
 export type ReceiptTransactionSimilarity = {
-	total: number;
-	date: number;
-	merchant: number;
+  total: number;
+  date: number;
+  merchant: number;
 };
 
 export const receiptTransactionFeatureSimilarity = ({
-	receipt,
-	transaction
+  receipt,
+  transaction
 }: {
-	receipt: ReceiptFeatures;
-	transaction: Transaction;
+  receipt: ReceiptFeatures;
+  transaction: Transaction;
 }) => {
-	let receiptTransactionSimilarity: ReceiptTransactionSimilarity = {
-		total: Infinity,
-		date: Infinity,
-		merchant: Infinity
-	};
+  let receiptTransactionSimilarity: ReceiptTransactionSimilarity = {
+    total: Infinity,
+    date: Infinity,
+    merchant: Infinity
+  };
 
-	// lower distance the more similar (0 is exactly the same)
-	receiptTransactionSimilarity.total = levenshtein.get(
-		receipt.total,
-		transaction.amount.toString()
-	);
+  // lower distance the more similar (0 is exactly the same)
+  receiptTransactionSimilarity.total = levenshtein.get(
+    receipt.total,
+    transaction.amount.toString()
+  );
 
-	receiptTransactionSimilarity.date = levenshtein.get(receipt.date, transaction.date);
+  receiptTransactionSimilarity.date = levenshtein.get(receipt.date, transaction.date);
 
-	receiptTransactionSimilarity.merchant = levenshtein.get(
-		receipt.merchant,
-		transaction.merchant_name ? transaction.merchant_name : ''
-	);
+  receiptTransactionSimilarity.merchant = levenshtein.get(
+    receipt.merchant,
+    transaction.merchant_name ? transaction.merchant_name : ''
+  );
 
-	return receiptTransactionSimilarity;
+  return receiptTransactionSimilarity;
 };

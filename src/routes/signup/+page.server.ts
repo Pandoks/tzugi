@@ -6,35 +6,35 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 
 export const load = async () => {
-	return {
-		form: await superValidate(zod(signupFormSchema))
-	};
+  return {
+    form: await superValidate(zod(signupFormSchema))
+  };
 };
 
 export const actions: Actions = {
-	default: async (event) => {
-		const formData = await event.request.formData();
-		const email = formData.get('email') as string;
-		const password = formData.get('password') as string;
+  default: async (event) => {
+    const formData = await event.request.formData();
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
 
-		const {
-			data: { user },
-			error
-		} = await event.locals.supabase.auth.signUp({
-			email,
-			password
-		});
+    const {
+      data: { user },
+      error
+    } = await event.locals.supabase.auth.signUp({
+      email,
+      password
+    });
 
-		if (error) {
-			return fail(500, { message: 'Server error. Try again later.', success: false, email });
-		}
+    if (error) {
+      return fail(500, { message: 'Server error. Try again later.', success: false, email });
+    }
 
-		try {
-			await db.insert(users).values({ id: user.id });
-		} catch (error) {
-			return fail(500, { message: 'Server error. Try again later.', success: false });
-		}
+    try {
+      await db.insert(users).values({ id: user.id });
+    } catch (error) {
+      return fail(500, { message: 'Server error. Try again later.', success: false });
+    }
 
-		return redirect(301, '/');
-	}
+    return redirect(301, '/');
+  }
 };
