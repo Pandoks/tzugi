@@ -12,7 +12,7 @@ import {
 import { type Transaction } from 'plaid';
 
 export const users = pgTable('users', {
-  id: uuid('id').primaryKey().notNull()
+  id: uuid('id').primaryKey().notNull() // id of user given by supabase auth
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -26,10 +26,11 @@ export const plaid = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id),
+    // bookmark for where you are in transactions (don't want to fetch every transactions everytime, just the new ones)
     cursor: text('cursor').default(''),
     accessToken: text('access_token').notNull().unique(),
     institutionId: text('institution_id').notNull(),
-    accounts: json('accounts').notNull()
+    accounts: json('accounts').notNull() // information about the account (eg. checking, credit card, etc)
   },
   (table) => {
     return { pk: primaryKey({ columns: [table.userId, table.institutionId] }) };
@@ -72,8 +73,8 @@ export const transactionsRelations = relations(transactions, ({ one }) => ({
 }));
 
 export const receipts = pgTable('receipts', {
-  imagePath: text('image_path').notNull().primaryKey(),
-  text: text('text').notNull().default(''),
+  imagePath: text('image_path').notNull().primaryKey(), // supabase storage location
+  text: text('text').notNull().default(''), // text on the receipt
   userId: uuid('user_id')
     .notNull()
     .references(() => users.id)

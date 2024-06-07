@@ -28,7 +28,6 @@
   };
 
   const exchangePublicToken = async (public_token: string, metadata: any) => {
-    console.log('exchangePublicToken');
     await fetch('/api/plaid/access-token', {
       method: 'POST',
       headers: {
