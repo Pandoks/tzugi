@@ -1,3 +1,7 @@
+/**
+ * Helper functions to interact with auth
+ */
+
 import { type RequestEvent } from '@sveltejs/kit';
 
 export const findUser = async (event: RequestEvent) => {

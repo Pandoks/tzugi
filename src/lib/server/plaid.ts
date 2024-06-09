@@ -1,3 +1,7 @@
+/**
+ * Setup Plaid
+ */
+
 import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid';
 import { PLAID_CLIENT_ID, PLAID_SECRET } from '$env/static/private';
 

@@ -1,3 +1,7 @@
+/**
+ * Interact with Google's AI APIs
+ */
+
 import visionOCR from '@google-cloud/vision';
 import { DocumentProcessorServiceClient } from '@google-cloud/documentai';
 import {

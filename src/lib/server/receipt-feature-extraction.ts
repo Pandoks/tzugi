@@ -1,3 +1,7 @@
+/**
+ * Use LLMs and OCR (Google AI APIs) to extract features out of images
+ */
+
 import type { Transaction } from 'plaid';
 import { detectWordsFromImage } from './google-vision';
 import { ollama } from './ollama';

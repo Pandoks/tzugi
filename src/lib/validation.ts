@@ -1,3 +1,7 @@
+/**
+ * Runtime validation schemas
+ */
+
 import { z } from 'zod';
 
 export const usernameSchema = z

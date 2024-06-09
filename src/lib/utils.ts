@@ -1,3 +1,7 @@
+/**
+ * Random functions that help out
+ */
+
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { cubicOut } from 'svelte/easing';

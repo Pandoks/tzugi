@@ -1,3 +1,7 @@
+/**
+ * Setup the database
+ */
+
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import { DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USERNAME } from '$env/static/private';

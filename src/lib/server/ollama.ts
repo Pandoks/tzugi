@@ -1,3 +1,7 @@
+/**
+ * Use ollama (local LLM)
+ */
+
 import ollamaClient, { type ChatResponse } from 'ollama';
 
 export const ollama = async ({

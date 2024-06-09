@@ -119,6 +119,14 @@
       }
     }
   };
+
+  const clickRow = (id: string) => {
+    if (currentRowId) {
+      currentRowId = null;
+    } else {
+      currentRowId = id;
+    }
+  };
 </script>
 
 <div>
@@ -144,7 +152,7 @@
           <Table.Body {...$tableBodyAttrs}>
             {#each $pageRows as row (row.id)}
               <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-                <Table.Row {...rowAttrs} on:click={() => (currentRowId = row.id)}>
+                <Table.Row {...rowAttrs} on:click={() => clickRow(row.id)}>
                   {#each row.cells as cell (cell.id)}
                     <Subscribe attrs={cell.attrs()} let:attrs>
                       <Table.Cell {...attrs}>

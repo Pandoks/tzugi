@@ -7,6 +7,7 @@ import { and, desc, eq } from 'drizzle-orm';
 import { findUser } from '$lib/server/auth';
 
 export const GET: RequestHandler = async (event) => {
+  console.log('api/plaid/transactions');
   const user = await findUser(event);
   if (!user) {
     return error(400, {
@@ -17,9 +18,11 @@ export const GET: RequestHandler = async (event) => {
     .select()
     .from(plaid)
     .where(eq(plaid.userId, user.id));
-  if (!accessToken || !cursor || !institutionId) {
+  if (!accessToken || !institutionId) {
     return error(400, { message: "Couldn't retrieve data from database" });
   }
+
+  console.log('get access token');
 
   let temporaryCursor = cursor;
 
