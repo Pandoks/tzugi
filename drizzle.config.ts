@@ -19,15 +19,16 @@ if (
 
 export default defineConfig({
   schema: './src/lib/db/schema.ts',
-  driver: 'pg',
+  dialect: 'postgresql',
   out: './drizzle',
   dbCredentials: {
     user: DB_USERNAME,
     password: DB_PASSWORD,
     host: DB_HOST,
     port: parseInt(DB_PORT),
-    database: DB_DATABASE // add SSL when drizzle supports it
-  },
-  verbose: true,
-  strict: true
+    database: DB_DATABASE, // add SSL when drizzle supports it
+    ssl: false
+  }
+  // verbose: true
+  // strict: true
 });
