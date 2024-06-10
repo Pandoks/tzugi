@@ -15,6 +15,7 @@ export const ollama = async ({
     model: model,
     messages: [{ role: 'user', content: prompt }]
   });
+  // checkout format field
 
   return response;
 };

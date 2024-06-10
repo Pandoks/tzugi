@@ -108,6 +108,7 @@ export const actions: Actions = {
       .update(transactions)
       .set({ imagePath: data.fullPath })
       .where(eq(transactions.id, mostSimilarTransaction.transaction.transaction_id));
+    console.log(data.fullPath);
 
     return { matched: true };
   }
