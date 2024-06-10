@@ -41,6 +41,13 @@ export const plaid = pgTable(
   }
 );
 
+export const plaidRelations = relations(plaid, ({ one }) => ({
+  user: one(users, {
+    fields: [plaid.userId],
+    references: [users.id]
+  })
+}));
+
 export const transactions = pgTable(
   'transactions',
   {
