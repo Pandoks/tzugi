@@ -3,18 +3,19 @@ import { users } from '$lib/db/schema';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async (event) => {
-  console.log("verifying mobile")
-  const { phone, code } = await event.request.json();
-  const { data, error: supabaseError } = await event.locals.supabase.auth.verifyOtp({
-    phone: phone,
-    token: code,
-    type: 'sms',
+  console.log("verifying email for mobile")
+  const { email, password } = await event.request.json();
+  console.log("Got ", email, password)
+  const {
+    data: { data },
+    error
+  } = await event.locals.supabase.auth.signUp({
+    email,
+    password
   });
-
-  console.log("Got verify request for phone", phone)
-  console.log("data:", data)
-  if (supabaseError) {
-    return json({ message: 'Server error. Try again later.', success: false, phone });
+  if (error) {
+    console.log("uh", data, "error", error)  
+    return json({ message: 'Supabase error. Try again later.', success: false });
   }
 
   const { session } = data;
@@ -36,7 +37,7 @@ export const POST: RequestHandler = async (event) => {
     refresh_token: session.refresh_token,
     user: {
       id: user.id,
-      phone: phone
+      email: email,
     }
   });
 };
